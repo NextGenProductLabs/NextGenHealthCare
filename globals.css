@@ -1,0 +1,181 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* CSS Reset for better scrolling */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  overflow-x: hidden;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;700;800&family=Open+Sans:wght@400;500;600&display=swap');
+
+@layer base {
+  html {
+    scroll-behavior: auto;
+    overflow-x: hidden;
+    height: 100%;
+  }
+  
+  body {
+    font-family: 'Open Sans', system-ui, sans-serif;
+    overflow-x: hidden;
+    overflow-y: auto;
+    position: relative;
+    min-height: 100vh;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Lato', system-ui, sans-serif;
+  }
+  
+  /* Fix scrolling issues */
+  * {
+    box-sizing: border-box;
+  }
+  
+  /* Ensure proper scrolling with fixed header */
+  main {
+    padding-top: 0;
+    min-height: 100vh;
+    overflow-x: hidden;
+    overflow-y: auto;
+    position: relative;
+  }
+  
+  /* Fix for smooth scrolling */
+  html {
+    scroll-padding-top: 80px; /* Account for fixed header height */
+  }
+  
+  /* Ensure sections don't have horizontal overflow */
+  section {
+    overflow-x: hidden;
+    width: 100%;
+    position: relative;
+  }
+  
+  /* Fix for any potential scroll containers */
+  .overflow-hidden {
+    overflow-y: auto !important;
+  }
+  
+  /* Ensure proper scrolling behavior */
+  #__next {
+    height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+  
+  /* Fix for any potential sticky positioning issues */
+  .sticky {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+  }
+}
+
+@layer components {
+  .aurora {
+    background: radial-gradient(60% 80% at 20% 10%, #FE3231 0%, transparent 60%),
+                radial-gradient(50% 70% at 80% 40%, #E5E4E4 0%, transparent 60%);
+    filter: blur(40px);
+    opacity: 0.35;
+    transform: translateZ(0);
+  }
+  
+  .magnetic-button {
+    transition: transform 0.2s ease-out;
+  }
+  
+  .magnetic-button:hover {
+    transform: scale(1.03);
+  }
+  
+  .card-hover {
+    transition: all 0.25s ease-out;
+  }
+  
+  .card-hover:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 20px 40px rgba(254, 50, 49, 0.15);
+  }
+  
+  /* Enhanced header styling */
+  .header-glass {
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+  
+  /* Enhanced button animations */
+  .btn-primary {
+    @apply bg-gradient-to-r from-brand-red to-red-600 text-white font-bold px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105;
+  }
+  
+  .btn-secondary {
+    @apply bg-white/15 backdrop-blur-xl text-white font-bold px-8 py-4 rounded-xl border-2 border-white/30 hover:border-white/50 shadow-2xl hover:shadow-white/25 transition-all duration-300;
+  }
+}
+
+@layer utilities {
+  .text-gradient {
+    background: linear-gradient(135deg, #FE3231 0%, #ff6b6b 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .shadow-brand {
+    box-shadow: 0 0 60px -25px rgba(254, 50, 49, 0.35);
+  }
+  
+  /* Enhanced text utilities */
+  .text-shadow {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  }
+  
+  .text-shadow-lg {
+    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+  }
+  
+  .text-shadow-xl {
+    text-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+  }
+  
+  /* Enhanced backdrop utilities */
+  .backdrop-blur-sm {
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+  
+  .backdrop-blur-md {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+  
+  .backdrop-blur-lg {
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+  
+  .backdrop-blur-xl {
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
