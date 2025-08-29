@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Insurance Form</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+  <div class="max-w-2xl mx-auto bg-white p-6 rounded shadow">
+    <h2 class="text-2xl font-bold mb-6">Insurance Information</h2>
+
+    <form id="insuranceForm">
+        <div class="mb-4 relative">
+            <label for="provider" class="block font-medium"><span class="text-red-500">*</span> Insurance Provider Name</label>
+            <input id="provider" class="border w-full p-2 rounded" type="text" autocomplete="off">
+            <div id="providerList" class="absolute z-10 bg-white border mt-1 rounded w-full max-h-32 overflow-y-auto hidden">
+              <div class="p-2 hover:bg-gray-100 cursor-pointer">Aetna Health and Life Insurance Company</div>
+              <div class="p-2 hover:bg-gray-100 cursor-pointer">BlueCrossSheild Health and Life Insurance Company</div>
+              <div class="p-2 hover:bg-gray-100 cursor-pointer">Cigna Health and Life Insurance Company</div>
+              <div class="p-2 hover:bg-gray-100 cursor-pointer">CVS Health and Life Insurance Company</div>
+              <div class="p-2 hover:bg-gray-100 cursor-pointer">Hartford Life and Accident Insurance Company</div>
+            </div>
+            <p class="text-red-500 text-sm hidden" id="errorProvider">Insurance Provider Name is required</p>
+          </div>
+
+      <div class="mb-4">
+        <label for="policy" class="block font-medium"><span class="text-red-500">*</span> Policy Number</label>
+        <input id="policy" type="text" class="border w-full p-2 rounded" placeholder="e.g., A12345-B" maxlength="30">
+        <p class="text-red-500 text-sm hidden" id="errorPolicy">Policy Number is required </p>
+      </div>
+
+      <div class="mb-4">
+        <label for="group" class="block font-medium"><span class="text-red-500">*</span> Group ID</label>
+        <input id="group" class="border w-full p-2 rounded" type="text">
+        <p class="text-red-500 text-sm hidden" id="errorGroup">Group ID is required.</p>
+      </div>
+
+      <div class="mb-4">
+        <label for="effective" class="block font-medium"><span class="text-red-500">*</span> Effective Date</label>
+        <input id="effective" class="border w-full p-2 rounded" type="date">
+        <p class="text-red-500 text-sm hidden" id="errorEffective">Effective Date is required.</p>
+        <p class="text-red-500 text-sm hidden" id="errorEffectiveFormat">Enter Effective Date in MM/DD/YYYY format.</p>
+        <p class="text-red-500 text-sm hidden" id="errorEffectiveFuture">Effective Date cannot be in the future.</p>
+        <p class="text-red-500 text-sm hidden" id="errorEffectiveLogical">Effective Date must be earlier than Termination Date.</p>
+      </div>
+
+      <div class="mb-4">
+        <label for="termination" class="block font-medium"><span class="text-red-500">*</span> Termination Date</label>
+        <input id="termination" class="border w-full p-2 rounded" type="date">
+        <p class="text-red-500 text-sm hidden" id="errorTermination">Termination Date is required.</p>
+        <p class="text-red-500 text-sm hidden" id="errorTerminationFormat">Enter Termination Date in MM/DD/YYYY format.</p>
+        <p class="text-red-500 text-sm hidden" id="errorTerminationInvalid">Termination Date cannot be earlier than Effective Date.</p>
+        <p class="text-red-500 text-sm hidden" id="errorTerminationExpired">Termination Date cannot be before today’s date.</p>
+<!-- ...existing code... -->
+      </div>
+
+      <div class="mb-4">
+        <label><input type="checkbox" id="showSecondary" class="mr-2"> I have secondary insurance coverage</label>
+      </div>
+
+      <div id="secondarySection" class="hidden border-t pt-4 mt-4">
+        <h3 class="text-lg font-semibold mb-2">Secondary Insurance</h3>
+
+        <div class="mb-4 relative">
+            <label for="provider2" class="block font-medium"><span class="text-red-500">*</span> Insurance Provider Name</label>
+            <input id="provider2" class="border w-full p-2 rounded" type="text" autocomplete="off">
+            <div id="provider2List" class="absolute z-10 bg-white border mt-1 rounded w-full max-h-32 overflow-y-auto hidden">
+              <div class="p-2 hover:bg-gray-100 cursor-pointer">Aetna Health and Life Insurance Company</div>
+              <div class="p-2 hover:bg-gray-100 cursor-pointer">BlueCrossSheild Health and Life Insurance Company</div>
+              <div class="p-2 hover:bg-gray-100 cursor-pointer">Cigna Health and Life Insurance Company</div>
+              <div class="p-2 hover:bg-gray-100 cursor-pointer">CVS Health and Life Insurance Company</div>
+              <div class="p-2 hover:bg-gray-100 cursor-pointer">Hartford Life and Accident Insurance Company</div>
+            </div>
+            <p class="text-red-500 text-sm hidden" id="errorProvider2">Insurance Provider Name is required</p>
+          </div>
+
+        <div class="mb-4">
+          <label for="policy2" class="block font-medium"><span class="text-red-500">*</span> Policy Number</label>
+          <input id="policy2" class="border w-full p-2 rounded" type="text" placeholder="e.g., A12345-B" maxlength="30">
+          <p class="text-red-500 text-sm hidden" id="errorPolicy2">Policy Number must be alphanumeric.</p>
+        </div>
+
+        <div class="mb-4">
+          <label for="group2" class="block font-medium"><span class="text-red-500">*</span> Group ID</label>
+          <input id="group2" class="border w-full p-2 rounded" type="text">
+          <p class="text-red-500 text-sm hidden" id="errorGroup2">Group ID is required.</p>
+        </div>
+
+        <div class="mb-4">
+          <label for="effective2" class="block font-medium"><span class="text-red-500">*</span> Effective Date</label>
+          <input id="effective2" class="border w-full p-2 rounded" type="date">
+        <p class="text-red-500 text-sm hidden" id="errorEffective2">Effective Date is required.</p>
+        <p class="text-red-500 text-sm hidden" id="errorEffectiveFormat2">Enter Effective Date in MM/DD/YYYY format.</p>
+        <p class="text-red-500 text-sm hidden" id="errorEffectiveFuture2">Effective Date cannot be in the future.</p>
+        <p class="text-red-500 text-sm hidden" id="errorEffectiveLogical2">Effective Date must be earlier than Termination Date.</p>
+      </div>
+
+        <div class="mb-4">
+          <label for="termination2" class="block font-medium"><span class="text-red-500">*</span> Termination Date</label>
+          <input id="termination2" class="border w-full p-2 rounded" type="date">
+        <p class="text-red-500 text-sm hidden" id="errorTermination2">Termination Date is required.</p>
+        <p class="text-red-500 text-sm hidden" id="errorTerminationFormat2">Enter Termination Date in MM/DD/YYYY format.</p>
+        <p class="text-red-500 text-sm hidden" id="errorTerminationInvalid2">Termination Date cannot be earlier than Effective Date.</p>
+        <p class="text-red-500 text-sm hidden" id="errorTerminationExpired2">Termination Date cannot be before today’s date.</p>
+        </div>
+      </div>
+
+      <p id="globalError" class="text-red-500 text-center mt-4 hidden">
+        Please correct the errors before continuing on respective fields.
+      </p>
+
+      <div class="flex justify-between gap-4 mt-6">
+        <button type="button" onclick="goPreviousSection()" class="bg-blue-600 text-white px-4 py-2 rounded">Previous</button>
+        <button type="button" onclick="clearForm()" class="bg-blue-600 text-white px-4 py-2 rounded">Clear</button>
+        <button type="button" onclick="goNextSection()" class="bg-blue-600 text-white px-4 py-2 rounded">Next</button>
+      </div>
+    </form>
+  </div>
+  
+  <p id="fallbackProviderList" class="text-yellow-600 text-sm mt-2 hidden">
+    Provider list is temporarily unavailable. Please enter manually.
+  </p>
+
+  <script>
+    const checkbox = document.getElementById("showSecondary");
+    const secondary = document.getElementById("secondarySection");
+
+    checkbox.addEventListener("change", () => {
+      secondary.classList.toggle("hidden", !checkbox.checked);
+    });
+
+    function showError(id, show) {
+      const errorEl = document.getElementById(id);
+      errorEl.classList.toggle("hidden", !show);
+
+      // Highlight the corresponding input box using Tailwind classes
+      const inputId = id.replace("error", "").charAt(0).toLowerCase() + id.replace("error", "").slice(1);
+      const input = document.getElementById(inputId);
+      if (input) {
+        if (show) {
+          input.classList.add("border-red-500", "border-2");
+        } else {
+          input.classList.remove("border-red-500", "border-2");
+        }
+      }
+    }
+
+
+    function saveFormData() {
+      const fields = [
+        "provider", "policy", "group", "effective", "termination"
+      ];
+      fields.forEach(id => {
+        sessionStorage.setItem(id, document.getElementById(id).value);
+      });
+      sessionStorage.setItem("showSecondary", checkbox.checked);
+
+      if (checkbox.checked) {
+        const secondaryFields = [
+          "provider2", "policy2", "group2", "effective2", "termination2"
+        ];
+        secondaryFields.forEach(id => {
+          sessionStorage.setItem(id, document.getElementById(id).value);
+        });
+      } else {
+        const secondaryFields = [
+          "provider2", "policy2", "group2", "effective2", "termination2"
+        ];
+        secondaryFields.forEach(id => {
+          sessionStorage.removeItem(id);
+        });
+      }
+    }
+
+    function loadFormData() {
+      const fields = [
+        "provider", "policy", "group", "effective", "termination"
+      ];
+      fields.forEach(id => {
+        const value = sessionStorage.getItem(id);
+        if (value) {
+          document.getElementById(id).value = value;
+        }
+      });
+      const showSecondaryState = sessionStorage.getItem("showSecondary");
+      if (showSecondaryState === "true") {
+        checkbox.checked = true;
+        secondary.classList.remove("hidden");
+        const secondaryFields = [
+          "provider2", "policy2", "group2", "effective2", "termination2"
+        ];
+        secondaryFields.forEach(id => {
+          const value = sessionStorage.getItem(id);
+          if (value) {
+            document.getElementById(id).value = value;
+          }
+        });
+      } else {
+        checkbox.checked = false;
+        secondary.classList.add("hidden");
+      }
+    }
+
+    function clearForm() {
+      document.getElementById("insuranceForm").reset();
+      document.querySelectorAll("p.text-red-500").forEach(el => el.classList.add("hidden"));
+      secondary.classList.add("hidden");
+      document.getElementById("globalError").classList.add("hidden");
+
+      // ✅ Remove red borders from all inputs using Tailwind classes
+      document.querySelectorAll("input").forEach(el => {
+        el.classList.remove("border-red-500", "border-2");
+        el.classList.add("border");
+      });
+
+      sessionStorage.clear();
+      
+      setupCustomDropdown('provider', 'providerList');
+      setupCustomDropdown('provider2', 'provider2List');
+
+      // ✅ Focus on the first input field after clearing the form
+      document.getElementById("provider").focus();
+    }
+
+    function goPreviousSection() {
+      saveFormData();
+      window.location.href = "medical.html";
+    }
+
+    function goNextSection() {
+      const valid = validateForm();
+      
+      document.getElementById("globalError").classList.toggle("hidden", valid);
+
+      if (valid) {
+        saveFormData();
+        window.location.href = "language.html";
+      }
+    }
+
+    function setupCustomDropdown(inputId, listId) {
+      const input = document.getElementById(inputId);
+      const list = document.getElementById(listId);
+      if (!list) return;
+      const items = list.querySelectorAll('div');
+      
+      input.addEventListener('focus', () => {
+        list.classList.remove('hidden');
+      });
+
+      input.addEventListener('input', () => {
+        const filter = input.value.toLowerCase();
+        let hasVisibleItems = false;
+        items.forEach(item => {
+          const text = item.textContent.toLowerCase();
+          if (text.includes(filter)) {
+            item.classList.remove('hidden');
+            hasVisibleItems = true;
+          } else {
+            item.classList.add('hidden');
+          }
+        });
+        if (hasVisibleItems) {
+            list.classList.remove('hidden');
+        } else {
+          list.classList.add('hidden');
+        }
+      });
+
+      items.forEach(item => {
+        item.addEventListener('click', () => {
+          input.value = item.textContent;
+          list.classList.add('hidden');
+          // Remove error when selecting from the list
+          showError("error" + inputId.charAt(0).toUpperCase() + inputId.slice(1), false);
+          input.classList.remove("border-red-500", "border-2");
+
+        });
+      });
+
+      document.addEventListener('click', (e) => {
+        if (!input.contains(e.target) && !list.contains(e.target)) {
+          list.classList.add('hidden');
+        }
+      });
+    }
+    // ✅ Clear sessionStorage only on page refresh (not when using next/previous)
+    if (
+      performance.navigation?.type === 1 || 
+      performance.getEntriesByType("navigation")[0]?.type === "reload"
+    ) {
+      sessionStorage.clear();
+    }
+
+
+    window.addEventListener("DOMContentLoaded", () => {
+        // Load saved form data on initial load or back/forward navigation.
+        loadFormData();
+        setupCustomDropdown('provider', 'providerList');
+        setupCustomDropdown('provider2', 'provider2List');
+    });
+
+    // This is the key section that makes the global error disappear on typing.
+    // It attaches an 'input' event listener to every form field.
+    // ...existing code...
+    // ...existing code...
+    ["provider", "policy", "group", "effective", "termination", "provider2", "policy2", "group2", "effective2", "termination2"].forEach(field => {
+      const el = document.getElementById(field);
+      const type = el.type === "file" ? "change" : "input";
+      el.addEventListener(type, () => {
+        showError("error" + field.charAt(0).toUpperCase() + field.slice(1), false);
+        if (field.includes("effective")) {
+          showError("errorEffectiveFuture" + (field.endsWith("2") ? "2" : ""), false);
+          showError("errorEffectiveLogical" + (field.endsWith("2") ? "2" : ""), false);
+        }
+        if (field.includes("termination")) {
+          showError("errorTerminationInvalid" + (field.endsWith("2") ? "2" : ""), false);
+          showError("errorTerminationExpired" + (field.endsWith("2") ? "2" : ""), false);
+          showError("errorEffectiveLogical" + (field.endsWith("2") ? "2" : ""), false);
+        }
+        document.getElementById("globalError").classList.add("hidden");
+      });
+      el.classList.remove("border-red-500", "border-2");
+    });
+// ...existing code...
+    // ...existing code...
+    function validateForm() {
+      let hasErrors = false;
+      const today = new Date().toISOString().split("T")[0];
+
+      function checkField(id, regex = null) {
+        const val = document.getElementById(id).value.trim();
+        const valid = regex ? regex.test(val) : !!val;
+        showError("error" + id.charAt(0).toUpperCase() + id.slice(1), !valid);
+        if (!valid) hasErrors = true;
+      }
+
+      checkField("provider", /^[a-zA-Z0-9\s/-]+$/);
+      checkField("policy", /^[a-zA-Z0-9/-]+$/);
+      checkField("group");
+
+      const eff = document.getElementById("effective").value;
+      const term = document.getElementById("termination").value;
+
+      showError("errorEffective", !eff); if (!eff) hasErrors = true;
+      showError("errorEffectiveFuture", eff && eff > today); if (eff && eff > today) hasErrors = true;
+      showError("errorTermination", !term); if (!term) hasErrors = true;
+
+      // Custom logic for primary termination date
+  // Custom logic for primary termination date
+    if (term && eff) {
+      // Show error if Effective Date is not earlier than Termination Date
+      const isEffLogical = eff >= term;
+      showError("errorEffectiveLogical", isEffLogical);
+      if (isEffLogical) hasErrors = true;
+
+      // First, check if termination is before effective date
+      const isInvalid = term <= eff;
+      showError("errorTerminationInvalid", isInvalid);
+      if (isInvalid) {
+        hasErrors = true;
+        // Hide the expired error if the invalid date error is shown
+        showError("errorTerminationExpired", false);
+      } else {
+        // Only check for expired if the date is valid (after effective date)
+        const isExpired = term < today;
+        showError("errorTerminationExpired", isExpired);
+        if (isExpired) hasErrors = true;
+      }
+    }
+
+      // ...existing code...
+    if (checkbox.checked) {
+      checkField("provider2", /^[a-zA-Z0-9\s/-]+$/);
+      checkField("policy2", /^[a-zA-Z0-9/-]+$/);
+      checkField("group2");
+
+      const eff2 = document.getElementById("effective2").value;
+      const term2 = document.getElementById("termination2").value;
+
+      showError("errorEffective2", !eff2); if (!eff2) hasErrors = true;
+      showError("errorEffectiveFuture2", eff2 && eff2 > today); if (eff2 && eff2 > today) hasErrors = true;
+      showError("errorTermination2", !term2); if (!term2) hasErrors = true;
+
+      // Custom logic for secondary termination date
+      if (term2 && eff2) {
+        // Show error if Effective Date is not earlier than Termination Date
+        const isEffLogical2 = eff2 >= term2;
+        showError("errorEffectiveLogical2", isEffLogical2);
+        if (isEffLogical2) hasErrors = true;
+
+        // First, check if termination is before effective date
+        const isInvalid2 = term2 <= eff2;
+        showError("errorTerminationInvalid2", isInvalid2);
+        if (isInvalid2) {
+          hasErrors = true;
+          showError("errorTerminationExpired2", false);
+        } else {
+          // Only check for expired if the date is valid (after effective date)
+          const isExpired2 = term2 < today;
+          showError("errorTerminationExpired2", isExpired2);
+          if (isExpired2) hasErrors = true;
+        }
+      }
+    }
+  }
+</script>
+</body>
+</html>
