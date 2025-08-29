@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="flex items-center justify-center min-h-screen bg-gray-100">
+
+
+  <div class="bg-white p-6 rounded shadow-md w-full max-w-md">
+    <h2 class="text-2xl font-semibold text-center text-blue-800 mb-6">Personal Information</h2>
+	
+    <label class="block font-medium mb-1"><span class="text-red-500">*</span>First Name:</label>
+    <input id="firstName" type="text" placeholder="Enter your first name" class="border p-2 w-full rounded mb-1">
+    <p id="firstNameError" class="text-red-500 text-sm hidden">First name is required</p>
+
+    <label class="block font-medium mt-4 mb-1">Middle Name:</label>
+    <input id="middleName" type="text" placeholder="Enter your middle name" class="border p-2 w-full rounded mb-1">
+
+    <label class="block font-medium mt-4 mb-1"><span class="text-red-500">*</span>Last Name:</label>
+    <input id="lastName" type="text" placeholder="Enter your last name" class="border p-2 w-full rounded mb-1">
+    <p id="lastNameError" class="text-red-500 text-sm hidden">Last name is required</p>
+
+    <label class="block font-medium mt-4 mb-1"><span class="text-red-500">*</span>Date of Birth:</label>
+    <input id="dob" type="date" class="border p-2 w-full rounded mb-1">
+    <p id="dobError" class="text-red-500 text-sm hidden">Date of Birth is required</p>
+
+	<label class="block font-medium mb-1 mt-4"><span class="text-red-500">*</span>Gender:</label>
+	<input id="gender" list="genderOptions" class="border rounded w-full px-3 py-1 mb-1">
+	<datalist id="genderOptions">
+	  <option value="Male">
+	  <option value="Female">
+	  <option value="Other">
+	  <option value="Prefer not to say">
+	</datalist>
+	<p id="genderError" class="text-red-500 text-sm hidden">Gender is required</p>
+
+	<label class="block font-medium mb-1 mt-4"><span class="text-red-500">*</span>Marital Status:</label>
+	<input id="maritalStatus" list="maritalOptions" class="border rounded w-full px-3 py-1 mb-1">
+	<datalist id="maritalOptions">
+	  <option value="Single">
+	  <option value="Married">
+	  <option value="Divorced">
+	  <option value="Widowed">
+	</datalist>
+	<p id="maritalError" class="text-red-500 text-sm hidden">Marital status is required</p>
+
+
+    <label class="block font-medium mt-4 mb-1"><span class="text-red-500">*</span>Social Security Number:</label>
+    <div class="relative">
+      <input 
+        id="ssn" 
+        type="text" 
+        class="border p-2 w-full rounded mb-1" 
+        placeholder="XXX-XX-XXXX"
+        name="ssn"
+        autocomplete="on"
+        inputmode="numeric"
+      >
+    </div>
+    <p id="ssnError" class="text-red-500 text-sm hidden">Social Security Number is required</p>
+
+    <label class="block font-medium mt-4 mb-1"><span class="text-red-500">*</span>Upload Patient Identity:</label>
+    <div class="border border-dashed rounded p-4 text-center mb-1">
+      <input type="file" id="identityUpload" class="hidden" accept=".jpg,.jpeg,.png,.pdf">
+      <p class="text-sm text-gray-600 mb-2">JPG, PNG, or PDF (Max 10MB)</p>
+      <button type="button" class="bg-blue-100 text-blue-600 px-4 py-1 rounded text-sm" onclick="document.getElementById('identityUpload').click()">Choose File</button>
+      <p id="fileName" class="text-sm mt-2"></p>
+    </div>
+    <p id="fileError" class="text-red-500 text-sm hidden"></p>
+	
+	<label class="block font-medium mt-4 mb-1"><span class="text-red-500">*</span>Upload Patient Photo:</label>
+	<div class="border border-dashed rounded p-4 text-center mb-1">
+	  <input type="file" id="photoUpload" class="hidden" accept=".jpg,.jpeg,.png">
+	  <p class="text-sm text-gray-600 mb-2">JPG or PNG (Max 3MB)</p>
+	  <button type="button" class="bg-blue-100 text-blue-600 px-4 py-1 rounded text-sm" onclick="document.getElementById('photoUpload').click()">Choose File</button>
+	  <p id="photoFileName" class="text-sm mt-2"></p>
+	</div>
+	<p id="photoError" class="text-red-500 text-sm hidden"></p>
+
+    <div class="flex justify-between mt-6">
+      <button onclick="clearForm()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-gray-600">Clear</button>
+      <button onclick="validateForm()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Next</button>
+    </div>
+  </div>
+
+  <script>
+    let realSSN = "";
+	const ssnInput = document.getElementById("ssn");
+	const dobInput = document.getElementById("dob");
+
+	dobInput.max = new Date().toISOString().split("T")[0];
+
+	function highlightField(id, showError) {
+	  const el = document.getElementById(id);
+	  if (showError) el.classList.add("border-red-500");
+	  else el.classList.remove("border-red-500");
+	}
+
+	function formatMaskedSSN() {
+	  if (!realSSN) return "";
+	  let masked = "";
+	  for (let i = 0; i < realSSN.length; i++) {
+		if (i < 5) masked += "•";
+		else masked += realSSN[i];
+		if (i === 2 || i === 4) masked += "-";
+	  }
+	  return masked;
+	}
+
+	function updateSsnDisplay() {
+	  ssnInput.value = formatMaskedSSN();
+	}
+
+	ssnInput.addEventListener("keydown", function (e) {
+	  const allowedNav = ["ArrowLeft","ArrowRight","ArrowUp","ArrowDown","Home","End","Tab"];
+	  if (allowedNav.includes(e.key) || e.ctrlKey || e.metaKey) return;
+
+	  if (/^[0-9]$/.test(e.key)) {
+		e.preventDefault();
+		if (realSSN.length < 9) {
+		  realSSN += e.key;
+		  updateSsnDisplay();
+		  document.getElementById("ssnError").classList.add("hidden");
+		  highlightField("ssn", false);
+		}
+		return;
+	  }
+
+	  if (e.key === "Backspace") {
+		e.preventDefault();
+		if (realSSN.length > 0) {
+		  realSSN = realSSN.slice(0, -1);
+		  updateSsnDisplay();
+		}
+		return;
+	  }
+
+	  e.preventDefault();
+	});
+
+	ssnInput.addEventListener("paste", function (e) {
+	  e.preventDefault();
+	  const digits = (e.clipboardData || window.clipboardData)
+		.getData("text")
+		.replace(/\D/g, "")
+		.slice(0, 9 - realSSN.length);
+	  if (digits) {
+		realSSN = (realSSN + digits).slice(0, 9);
+		updateSsnDisplay();
+	  }
+	});
+
+	function syncAutofill() {
+	  const digits = ssnInput.value.replace(/\D/g, "").slice(0, 9);
+	  if (digits) {
+		realSSN = digits;
+		updateSsnDisplay();
+	  } else {
+		realSSN = "";
+		ssnInput.value = "";
+	  }
+	}
+	ssnInput.addEventListener("change", syncAutofill);
+
+
+    dobInput.addEventListener("input", () => {
+      const selectedDate = new Date(dobInput.value);
+      const today = new Date();
+      today.setHours(0,0,0,0);
+      if (dobInput.value && selectedDate > today) {
+        document.getElementById("dobError").classList.remove("hidden");
+        highlightField("dob", true);
+      } else {
+        document.getElementById("dobError").classList.add("hidden");
+        highlightField("dob", false);
+      }
+    });
+	["firstName", "middleName", "lastName", "gender", "maritalStatus"].forEach(id => {
+	  const field = document.getElementById(id);
+	  if (field) {
+		field.addEventListener("input", (e) => {
+		  field.value = field.value.replace(/[^a-zA-Z\s]/g, ""); 
+		});
+	  }
+	});
+    ["firstName","lastName"].forEach(id => {
+      const el = document.getElementById(id);
+      el.addEventListener("input", () => {
+        const err = document.getElementById(id + "Error");
+        if (err) err.classList.add("hidden");
+        highlightField(id, false);
+      });
+    });
+
+    document.getElementById("gender").addEventListener("change", () => {
+      document.getElementById("genderError").classList.add("hidden");
+      highlightField("gender", false);
+    });
+
+    document.getElementById("maritalStatus").addEventListener("change", () => {
+      document.getElementById("maritalError").classList.add("hidden");
+      highlightField("maritalStatus", false);
+    });
+
+    document.getElementById("identityUpload").addEventListener("change", function (e) {
+      const file = e.target.files[0];
+      const fileName = document.getElementById("fileName");
+      const fileError = document.getElementById("fileError");
+
+      if (file) {
+        const validTypes = ["image/jpeg", "image/png", "application/pdf"];
+        if (!validTypes.includes(file.type)) {
+          fileError.textContent = "Invalid file type (JPG, PNG, PDF only)";
+          fileError.classList.remove("hidden");
+          e.target.value = "";
+          fileName.textContent = "";
+          return;
+        }
+
+        if (file.size > 10 * 1024 * 1024) {
+          fileError.textContent = "File too large (max 10MB)";
+          fileError.classList.remove("hidden");
+          e.target.value = "";
+          fileName.textContent = "";
+          return;
+        }
+
+        fileName.textContent = file.name;
+        fileError.classList.add("hidden");
+      } else {
+        fileName.textContent = "";
+      }
+    });
+	
+	document.getElementById("photoUpload").addEventListener("change", function (e) {
+	  const file = e.target.files[0];
+	  const fileName = document.getElementById("photoFileName");
+	  const fileError = document.getElementById("photoError");
+
+	  if (file) {
+		const validTypes = ["image/jpeg", "image/png"];
+		if (!validTypes.includes(file.type)) {
+		  fileError.textContent = "Invalid file type (JPG, PNG only)";
+		  fileError.classList.remove("hidden");
+		  e.target.value = "";
+		  fileName.textContent = "";
+		  return;
+		}
+
+		if (file.size > 3 * 1024 * 1024) {
+		  fileError.textContent = "File too large (max 3MB)";
+		  fileError.classList.remove("hidden");
+		  e.target.value = "";
+		  fileName.textContent = "";
+		  return;
+		}
+
+		fileName.textContent = file.name;
+		fileError.classList.add("hidden");
+	  } else {
+		fileName.textContent = "";
+	  }
+	});
+
+    function clearForm() {
+      realSSN = "";
+      ["firstName", "middleName", "lastName", "dob", "ssn", "gender", "maritalStatus"].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.value = "";
+          highlightField(id, false);
+        }
+      });
+      document.getElementById("identityUpload").value = "";
+      document.getElementById("fileName").textContent = "";
+      highlightField("gender", false);
+      highlightField("maritalStatus", false);
+
+      document.querySelectorAll("[id$='Error']").forEach(el => el.classList.add("hidden"));
+	  
+	  document.getElementById("firstName").focus();
+    }
+
+    function validateForm() {
+      let isValid = true;
+
+      if (!document.getElementById("firstName").value.trim()) {
+        document.getElementById("firstNameError").classList.remove("hidden");
+        highlightField("firstName", true);
+        isValid = false;
+      } else {
+        highlightField("firstName", false);
+      }
+
+      if (!document.getElementById("lastName").value.trim()) {
+        document.getElementById("lastNameError").classList.remove("hidden");
+        highlightField("lastName", true);
+        isValid = false;
+      } else {
+        highlightField("lastName", false);
+      }
+
+      // Validate DOB
+      if (!dobInput.value) {
+        dobError.textContent = "Date of birth is required";
+        dobError.classList.remove("hidden");
+        highlightField("dob", true);
+        isValid = false;
+      } else {
+        const enteredDate = new Date(dobInput.value);
+        const today = new Date();
+        const minDate = new Date(today.getFullYear() - 120, today.getMonth(), today.getDate()); // 120 years ago
+
+        if (enteredDate > today || enteredDate < minDate) {
+          dobError.textContent = "Date of birth is invalid";
+          dobError.classList.remove("hidden");
+          highlightField("dob", true);
+          isValid = false;
+        } else {
+          dobError.classList.add("hidden");
+          highlightField("dob", false);
+        }
+      }
+
+      if (!document.getElementById("gender").value) {
+        document.getElementById("genderError").classList.remove("hidden");
+        highlightField("gender", true);
+        isValid = false;
+      } else {
+        highlightField("gender", false);
+      }
+
+      if (!document.getElementById("maritalStatus").value) {
+        document.getElementById("maritalError").classList.remove("hidden");
+        highlightField("maritalStatus", true);
+        isValid = false;
+      } else {
+        highlightField("maritalStatus", false);
+      }
+
+      if (realSSN.length !== 9) {
+        document.getElementById("ssnError").classList.remove("hidden");
+        highlightField("ssn", true);
+        isValid = false;
+      } else {
+        highlightField("ssn", false);
+      }
+
+      if (!document.getElementById("identityUpload").value) {
+        document.getElementById("fileError").textContent = "Patient Identity is required";
+        document.getElementById("fileError").classList.remove("hidden");
+        isValid = false;
+      } else {
+        document.getElementById("fileError").classList.add("hidden");
+      }
+	  if (!document.getElementById("photoUpload").value) {
+		  document.getElementById("photoError").textContent = "Patient Photo is required";
+		  document.getElementById("photoError").classList.remove("hidden");
+		  isValid = false;
+		} else {
+		  document.getElementById("photoError").classList.add("hidden");
+		}
+
+      if (isValid) {
+        window.location.href = "CI.html";
+      }
+    }
+  </script>
+</body>
+</html>
