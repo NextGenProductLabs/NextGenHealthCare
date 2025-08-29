@@ -1,0 +1,118 @@
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Patient Preferences</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 py-10">
+  <div class="max-w-xl mx-auto bg-white p-8 rounded-2xl shadow-lg">
+    <h2 class="text-2xl font-semibold text-center text-blue-800 mb-6">Language & Communication Preferences</h2>
+
+    <!-- Preferred Language -->
+    <label for="language" class="block text-sm font-medium text-gray-700 mt-4">
+      <span class="text-red-600">*</span> Preferred Language:
+    </label>
+    <select id="language" name="language"
+      class="mt-2 block w-full px-4 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+      onchange="hideError('languageError')">
+      <option value="">--Select--</option>
+      <option>English</option>
+      <option>Spanish</option>
+      <option>Mandarin</option>
+    </select>
+    <p id="languageError" class="text-red-600 text-sm mt-1 hidden">Please select a preferred language.</p>
+
+    <!-- Communication Method -->
+    <label class="block text-sm font-medium text-gray-700 mt-6">
+      <span class="text-red-600">*</span> Communication Method:
+    </label>
+    <div class="flex items-center gap-2 mt-2" onchange="hideError('commError')">
+      <input type="radio" id="commEmail" name="commMethod" value="email" class="text-blue-600" checked>
+      <label for="commEmail" class="text-gray-700">Email</label>
+    </div>
+    <p id="commError" class="text-red-600 text-sm mt-1 hidden">Please select a communication method.</p>
+
+    <!-- Preferred Documentation Method -->
+    <label class="block text-sm font-medium text-gray-700 mt-6">
+      <span class="text-red-600">*</span> Preferred Documentation Method:
+    </label>
+    <div class="flex items-center gap-6 mt-2" onchange="hideError('deliveryError')">
+      <div class="flex items-center gap-2">
+        <input type="radio" id="delPaper" name="delivery" value="paper" class="text-blue-600" checked>
+        <label for="delPaper" class="text-gray-700">Paper</label>
+      </div>
+      <div class="flex items-center gap-2">
+        <input type="radio" id="delPaperless" name="delivery" value="paperless" class="text-blue-600">
+        <label for="delPaperless" class="text-gray-700">Paperless</label>
+      </div>
+    </div>
+    <p id="deliveryError" class="text-red-600 text-sm mt-1 hidden">Please select a delivery method.</p>
+
+    <!-- Buttons -->
+    <div class="flex justify-between mt-10">
+      <button class="bg-blue-700 text-white px-5 py-2 rounded-lg hover:bg-gray-500" onclick="goPrevious()">Previous</button>
+      <button class="bg-blue-700 text-white px-5 py-2 rounded-lg hover:bg-gray-500" onclick="clearForm()">Clear</button>
+      <button class="bg-blue-700 text-white px-5 py-2 rounded-lg hover:bg-gray-500" onclick="goNext()">Next</button>
+    </div>
+  </div>
+
+  <script>
+    function clearForm() {
+      document.getElementById('language').selectedIndex = 0;
+
+      document.getElementById('commEmail').checked = true;
+
+      document.getElementById('delPaper').checked = true;
+      document.getElementById('delPaperless').checked = false;
+
+      hideAllErrors();
+    }
+
+    function hideAllErrors() {
+      hideError("languageError");
+      hideError("commError");
+      hideError("deliveryError");
+    }
+
+    function hideError(id) {
+      document.getElementById(id).classList.add("hidden");
+    }
+
+    function validateForm() {
+      hideAllErrors();
+      let valid = true;
+
+      const language = document.getElementById('language').value;
+      const commMethod = document.querySelector('input[name="commMethod"]:checked');
+      const deliveryMethod = document.querySelector('input[name="delivery"]:checked');
+
+      if (!language) {
+        document.getElementById("languageError").classList.remove("hidden");
+        valid = false;
+      }
+
+      if (!commMethod) {
+        document.getElementById("commError").classList.remove("hidden");
+        valid = false;
+      }
+
+      if (!deliveryMethod) {
+        document.getElementById("deliveryError").classList.remove("hidden");
+        valid = false;
+      }
+
+      return valid;
+    }
+
+    function goPrevious() {
+      window.location.href = "step1.html";
+    }
+
+    function goNext() {
+      if (validateForm()) {
+        window.location.href = "step3.html";
+      }
+    }
+  </script>
+</body>
+</html>
