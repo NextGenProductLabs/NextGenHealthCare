@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Information</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* This custom CSS is specifically for the custom dropdown to match your image */
+        .custom-select-wrapper {
+            position: relative;
+        }
+
+        .custom-select-button {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            padding: 0.5rem 1rem;
+            border: 1px solid #d1d5db; /* gray-300 */
+            border-radius: 0.375rem; /* rounded-md */
+            background-color: white;
+            cursor: pointer;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+
+        .custom-select-button:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5); /* blue ring on focus */
+        }
+        
+        .custom-select-button.active {
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
+        }
+
+        .custom-select-options {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            z-index: 10;
+            margin-top: 0.25rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            background-color: white;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            overflow: hidden;
+            display: none;
+        }
+        
+        .custom-select-option {
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s, color 0.2s;
+        }
+        
+        .custom-select-option:hover {
+            background-color: #3b82f6; /* blue-500 */
+            color: white;
+        }
+        
+        .custom-select-option.selected {
+            background-color: #3b82f6; /* blue-500 */
+            color: white;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+    <div class="max-w-2xl w-full mx-auto bg-white p-8 rounded-lg shadow-lg">
+        <h2 class="text-2xl font-bold text-center text-blue-800 mb-6">Contact Information</h2>
+        <form id="contactForm">
+            <div class="mb-5">
+                <label for="email" class="block text-gray-700 font-semibold mb-2">
+                    <span class="text-red-500">*</span> Email Address
+                </label>
+                <input type="email" id="email" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-200" placeholder="example@example.com">
+                <p id="email-validation" class="text-red-500 text-sm mt-1 hidden">Email Address is required.</p>
+            </div>
+
+            <div class="mb-5">
+                <label for="primary-contact" class="block text-gray-700 font-semibold mb-2">
+                    <span class="text-red-500">*</span> Primary Contact Number
+                </label>
+                <input type="tel" id="primary-contact" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-200" placeholder="(123)-456-7890">
+                <p id="primary-contact-validation" class="text-red-500 text-sm mt-1 hidden">Please enter a valid contact number.</p>
+            </div>
+
+            <div class="mb-5">
+                <label for="secondary-contact" class="block text-gray-700 font-semibold mb-2">
+                    Secondary Contact Number
+                </label>
+                <input type="tel" id="secondary-contact" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-200" placeholder="(123)-456-7890">
+                <p id="secondary-contact-validation" class="text-red-500 text-sm mt-1 hidden">Please enter a valid secondary contact number in the format (123)-456-7890.</p>
+            </div>
+            <div class="mb-5">
+                <label for="emergency-name" class="block text-gray-700 font-semibold mb-2">
+                    Emergency Contact Name
+                </label>
+                <input type="text" id="emergency-name" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-200">
+            </div>
+
+            <div class="mb-5">
+                <label for="emergency-contact" class="block text-gray-700 font-semibold mb-2">
+                    Emergency Contact Number
+                </label>
+                <input type="tel" id="emergency-contact" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-200" placeholder="(123)-456-7890">
+                <p id="emergency-contact-validation" class="text-red-500 text-sm mt-1 hidden">Please enter a valid emergency contact number in the format (123)-456-7890.</p>
+            </div>
+
+            <div class="mb-6">
+                <label for="preferred-mode" class="block text-gray-700 font-semibold mb-2">
+                    <span class="text-red-500">*</span> Preferred Mode of Contact
+                </label>
+                <div class="custom-select-wrapper">
+                    <div id="preferred-mode-button" class="custom-select-button" tabindex="0">
+                        <span id="selected-option-text">Primary Contact Number</span>
+                        <svg class="w-4 h-4 text-gray-600 ml-2 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </div>
+                    <div id="preferred-mode-options" class="custom-select-options">
+                        <div class="custom-select-option selected" data-value="primary-contact">Primary Contact Number</div>
+                        <div class="custom-select-option" data-value="secondary-contact">Secondary Contact Number</div>
+                        <div class="custom-select-option" data-value="email">Email</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex justify-between items-center mt-8">
+                <button type="button" id="previousBtn" class="bg-blue-600 text-white font-bold py-2 px-6 rounded-md hover:bg-blue-700 transition duration-300">Previous</button>
+                <button type="reset" class="bg-blue-600 text-white font-bold py-2 px-6 rounded-md hover:bg-blue-700 transition duration-300">Clear</button>
+                <button type="button" id="nextBtn" class="bg-blue-600 text-white font-bold py-2 px-6 rounded-md hover:bg-blue-700 transition duration-300">Next</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        const form = document.getElementById('contactForm');
+        const emailInput = document.getElementById('email');
+        const primaryContactInput = document.getElementById('primary-contact');
+        const secondaryContactInput = document.getElementById('secondary-contact');
+        const emergencyNameInput = document.getElementById('emergency-name');
+        const emergencyContactInput = document.getElementById('emergency-contact');
+        
+        const previousBtn = document.getElementById('previousBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const clearBtn = document.querySelector('button[type="reset"]');
+
+        const emailValidation = document.getElementById('email-validation');
+        const primaryContactValidation = document.getElementById('primary-contact-validation');
+        const secondaryContactValidation = document.getElementById('secondary-contact-validation');
+        const emergencyContactValidation = document.getElementById('emergency-contact-validation');
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const phoneRegex = /^\(\d{3}\)-\d{3}-\d{4}$/;
+
+        function showValidationError(input, validationElement, message) {
+            input.classList.add('border-red-500');
+            validationElement.classList.remove('hidden');
+            validationElement.textContent = message;
+        }
+
+        function hideValidationError(input, validationElement) {
+            input.classList.remove('border-red-500');
+            validationElement.classList.add('hidden');
+            validationElement.textContent = ''; 
+        }
+
+        function validateAndShowError(input, validationElement, regex, requiredMessage, formatMessage) {
+            const value = input.value.trim();
+            if (value === '') {
+                showValidationError(input, validationElement, requiredMessage);
+                return false;
+            } else if (regex && !regex.test(value)) {
+                showValidationError(input, validationElement, formatMessage);
+                return false;
+            } else {
+                hideValidationError(input, validationElement);
+                return true;
+            }
+        }
+        
+        function formatPhoneNumber(input) {
+            let value = input.value.replace(/\D/g, ''); 
+            if (value.length > 10) {
+                value = value.substring(0, 10);
+            }
+            if (value.length > 6) {
+                value = `(${value.substring(0, 3)})-${value.substring(3, 6)}-${value.substring(6, 10)}`;
+            } else if (value.length > 3) {
+                value = `(${value.substring(0, 3)})-${value.substring(3, 6)}`;
+            } else if (value.length > 0) {
+                value = `(${value.substring(0, 3)}`;
+            }
+            input.value = value;
+        }
+        
+        function setupValidationListeners(inputElement, validationElement, regex, requiredMessage, formatMessage, isRequired = false) {
+            inputElement.addEventListener('focus', () => {
+                hideValidationError(inputElement, validationElement);
+            });
+
+            inputElement.addEventListener('blur', () => {
+                const value = inputElement.value.trim();
+                if (isRequired && value === '') {
+                    showValidationError(inputElement, validationElement, requiredMessage);
+                } else if (value !== '' && regex && !regex.test(value)) {
+                    showValidationError(inputElement, validationElement, formatMessage);
+                } else {
+                    hideValidationError(inputElement, validationElement);
+                }
+            });
+
+            if (inputElement.type === 'tel') {
+                inputElement.addEventListener('input', () => {
+                    formatPhoneNumber(inputElement);
+                    hideValidationError(inputElement, validationElement);
+                });
+            } else {
+                inputElement.addEventListener('input', () => {
+                    hideValidationError(inputElement, validationElement);
+                });
+            }
+        }
+        
+        // This function sets up all the validation listeners on form load.
+        function setupAllValidationListeners() {
+             setupValidationListeners(emailInput, emailValidation, emailRegex, 'Email Address is required.', 'Please enter a valid email address.', true);
+             setupValidationListeners(primaryContactInput, primaryContactValidation, phoneRegex, 'Please enter a valid contact number.', 'Please enter a valid contact number.', true);
+             setupValidationListeners(secondaryContactInput, secondaryContactValidation, phoneRegex, '', 'Please enter a valid secondary contact number in the format (123)-456-7890.', false);
+             setupValidationListeners(emergencyContactInput, emergencyContactValidation, phoneRegex, '', 'Please enter a valid emergency contact number in the format (123)-456-7890.', false);
+        }
+        
+        // --- Custom Dropdown Logic ---
+        const customSelectButton = document.getElementById('preferred-mode-button');
+        const customSelectOptions = document.getElementById('preferred-mode-options');
+        const selectedOptionText = document.getElementById('selected-option-text');
+        const allOptions = document.querySelectorAll('.custom-select-option');
+        
+        let preferredModeValue = 'primary-contact'; // Initial value to store the selected option's value
+
+        // Toggles the visibility of the dropdown options
+        customSelectButton.addEventListener('click', (e) => {
+            e.stopPropagation(); 
+            customSelectOptions.style.display = customSelectOptions.style.display === 'block' ? 'none' : 'block';
+            customSelectButton.classList.toggle('active');
+        });
+
+        // Handles option selection
+        allOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                preferredModeValue = option.getAttribute('data-value');
+                selectedOptionText.textContent = option.textContent;
+
+                allOptions.forEach(opt => opt.classList.remove('selected'));
+                option.classList.add('selected');
+
+                customSelectOptions.style.display = 'none';
+                customSelectButton.classList.remove('active');
+            });
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!customSelectButton.contains(e.target)) {
+                customSelectOptions.style.display = 'none';
+                customSelectButton.classList.remove('active');
+            }
+        });
+
+        // 👇 This function saves all form data to localStorage
+        function saveFormData() {
+            const formData = {
+                email: emailInput.value,
+                primaryContact: primaryContactInput.value,
+                secondaryContact: secondaryContactInput.value,
+                emergencyName: emergencyNameInput.value,
+                emergencyContact: emergencyContactInput.value,
+                preferredMode: preferredModeValue
+            };
+            localStorage.setItem('contactInfo', JSON.stringify(formData));
+        }
+
+        // 👇 This function loads data from localStorage when the page loads
+        function loadFormData() {
+            const savedData = localStorage.getItem('contactInfo');
+            if (savedData) {
+                const formData = JSON.parse(savedData);
+                emailInput.value = formData.email || '';
+                primaryContactInput.value = formData.primaryContact || '';
+                secondaryContactInput.value = formData.secondaryContact || '';
+                emergencyNameInput.value = formData.emergencyName || '';
+                emergencyContactInput.value = formData.emergencyContact || '';
+                
+                // Update the custom dropdown with the saved value
+                preferredModeValue = formData.preferredMode || 'primary-contact';
+                const selectedOption = document.querySelector(`.custom-select-option[data-value="${preferredModeValue}"]`);
+                if (selectedOption) {
+                    selectedOptionText.textContent = selectedOption.textContent;
+                    allOptions.forEach(opt => opt.classList.remove('selected'));
+                    selectedOption.classList.add('selected');
+                }
+            }
+        }
+
+        // Call loadFormData and setupValidationListeners when the document is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            loadFormData();
+            // Don't show validation errors on page load, even if fields are empty.
+            // Validation errors will only appear on 'blur' or 'next' click.
+            setupAllValidationListeners();
+        });
+
+        previousBtn.addEventListener('click', () => {
+            // Save data before navigating
+            saveFormData();
+            window.location.href = 'personal-info.html'; // Previous page navigation
+        });
+
+        nextBtn.addEventListener('click', () => {
+            let isValid = true;
+            
+            // Validate all required fields and show errors
+            const isEmailValid = validateAndShowError(emailInput, emailValidation, emailRegex, 'Email Address is required.', 'Please enter a valid email address.');
+            const isPrimaryContactValid = validateAndShowError(primaryContactInput, primaryContactValidation, phoneRegex, 'Please enter a valid contact number.', 'Please enter a valid contact number.');
+            
+            isValid = isEmailValid && isPrimaryContactValid;
+            
+            // Validate optional fields if they have a value
+            if (secondaryContactInput.value.trim() !== '') {
+                const isSecondaryValid = validateAndShowError(secondaryContactInput, secondaryContactValidation, phoneRegex, '', 'Please enter a valid secondary contact number in the format (123)-456-7890.');
+                isValid = isValid && isSecondaryValid;
+            } else {
+                hideValidationError(secondaryContactInput, secondaryContactValidation);
+            }
+            if (emergencyContactInput.value.trim() !== '') {
+                const isEmergencyValid = validateAndShowError(emergencyContactInput, emergencyContactValidation, phoneRegex, '', 'Please enter a valid emergency contact number in the format (123)-456-7890.');
+                isValid = isValid && isEmergencyValid;
+            } else {
+                hideValidationError(emergencyContactInput, emergencyContactValidation);
+            }
+
+            if (isValid) {
+                // Save data before navigating
+                saveFormData();
+                window.location.href = 'address-info.html'; // Next page navigation
+            }
+        });
+        
+        clearBtn.addEventListener('click', () => {
+            localStorage.removeItem('contactInfo');
+            form.reset();
+            
+            // Reset custom dropdown state
+            preferredModeValue = 'primary-contact';
+            selectedOptionText.textContent = 'Primary Contact Number';
+            allOptions.forEach(opt => opt.classList.remove('selected'));
+            document.querySelector(`.custom-select-option[data-value="primary-contact"]`).classList.add('selected');
+
+            const validationMessages = document.querySelectorAll('[id$="-validation"]');
+            validationMessages.forEach(msg => {
+                msg.classList.add('hidden');
+                msg.textContent = '';
+            });
+
+            const formInputs = document.querySelectorAll('input, select');
+            formInputs.forEach(input => input.classList.remove('border-red-500'));
+            
+            emailInput.focus();
+        });
+    </script>
+</body>
+</html>
