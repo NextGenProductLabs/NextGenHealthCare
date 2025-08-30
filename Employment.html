@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Employment Information</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Custom scrollable dropdown */
+    .dropdown-list {
+      max-height: 120px; /* Scrollable height */
+      overflow-y: auto;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      position: absolute;
+      background: white;
+      width: 100%;
+      display: none;
+      z-index: 10;
+    }
+    .dropdown-list div {
+      padding: 8px;
+      cursor: pointer;
+    }
+    .dropdown-list div:hover {
+      background: #f0f0f0;
+    }
+    .error {
+      color: red;
+      font-size: 0.875rem;
+      display: none;
+    }
+  </style>
+</head>
+<body class="bg-gray-100 font-sans p-6">
+  <div class="max-w-md mx-auto bg-white p-6 rounded-xl shadow-md">
+    <h2 class="text-2xl font-bold mb-4 text-center">Employment Information</h2>
+
+    <!-- Employment Status -->
+    <label for="employmentStatus" class="block font-bold mt-4">
+      <span class="text-red-600 mr-1">*</span> Employment Status
+    </label>
+
+    <div class="relative">
+      <input id="employmentStatus"
+        class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md"
+        placeholder="Type or select your employment status"
+        autocomplete="off"> <!-- removed past saved data -->
+
+      <!-- Fake arrow -->
+      <span class="absolute inset-y-0 right-3 flex items-center pointer-events-none text-gray-500">▼</span>
+
+      <!-- Scrollable dropdown -->
+      <div id="dropdown" class="dropdown-list">
+        <div>Employed</div>
+        <div>Self-Employed</div>
+        <div>Retired</div>
+        <div>Unemployed</div>
+      </div>
+    </div>
+    <span id="statusError" class="error">Please select Employment Status.</span>
+
+    <!-- Occupation -->
+    <div id="occupationWrapper" style="display:none;">
+      <label for="Occupation" class="block font-bold mt-4">
+        <span class="text-red-600 mr-1">*</span> Occupation
+      </label>
+      <input id="Occupation" type="text"
+        class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md"
+        placeholder="Enter Occupation">
+      <span id="occupationError" class="error">Please enter Occupation.</span>
+    </div>
+
+    <!-- Total Annual Income -->
+    <div id="incomeWrapper" style="display:none;">
+      <label for="income" class="block font-bold mt-4">
+        <span class="text-red-600 mr-1">*</span> Total Annual Income ($)
+      </label>
+      <input id="income" type="text"
+        class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md"
+        placeholder="Enter income in dollars">
+      <span id="incomeError" class="error">Please enter Income.</span>
+    </div>
+
+    <!-- Buttons -->
+    <div class="flex justify-between mt-6">
+      <button id="prevBtn" class="bg-blue-500 text-white px-4 py-2 rounded-md">Previous</button>
+      <button id="clearBtn" type="reset" class="bg-blue-500 text-white px-4 py-2 rounded-md">Clear</button>
+      <button id="nextBtn" class="bg-blue-500 text-white px-4 py-2 rounded-md">Next</button>
+    </div>
+  </div>
+
+  <script>
+    const input = document.getElementById("employmentStatus");
+    const dropdown = document.getElementById("dropdown");
+    const occupationWrapper = document.getElementById("occupationWrapper");
+    const incomeWrapper = document.getElementById("incomeWrapper");
+
+    const statusError = document.getElementById("statusError");
+    const occupationError = document.getElementById("occupationError");
+    const incomeError = document.getElementById("incomeError");
+
+    const occupationInput = document.getElementById("Occupation");
+    const incomeInput = document.getElementById("income");
+
+    // Show dropdown when input is focused
+    input.addEventListener("focus", () => {
+      dropdown.style.display = "block";
+    });
+
+    // Hide dropdown when clicking outside
+    document.addEventListener("click", (e) => {
+      if (!dropdown.contains(e.target) && e.target !== input) {
+        dropdown.style.display = "none";
+      }
+    });
+
+    // Filter options while typing
+    input.addEventListener("input", () => {
+      const filter = input.value.toLowerCase();
+      Array.from(dropdown.children).forEach(option => {
+        option.style.display = option.textContent.toLowerCase().includes(filter) ? "block" : "none";
+      });
+    });
+
+    // Click to select option
+    dropdown.addEventListener("click", (e) => {
+      if (e.target.tagName === "DIV") {
+        input.value = e.target.textContent;
+        dropdown.style.display = "none";
+        toggleFields();
+      }
+    });
+
+    // Toggle occupation & income fields based on status
+    function toggleFields() {
+      if (input.value === "Employed" || input.value === "Self-Employed") {
+        occupationWrapper.style.display = "block";
+        incomeWrapper.style.display = "block";
+      } else {
+        occupationWrapper.style.display = "none";
+        incomeWrapper.style.display = "none";
+      }
+    }
+
+    // Income formatting
+    incomeInput.addEventListener("input", function (e) {
+      let value = e.target.value.replace(/[^0-9]/g, "");
+      if (value) {
+        value = parseInt(value, 10).toLocaleString("en-US");
+      }
+      e.target.value = value;
+    });
+
+    // Save data to localStorage
+    function saveData() {
+      localStorage.setItem("employmentStatus", input.value);
+      localStorage.setItem("occupation", occupationInput.value);
+      localStorage.setItem("income", incomeInput.value);
+    }
+
+    // Load saved data
+    window.onload = () => {
+      if (localStorage.getItem("employmentStatus")) {
+        input.value = localStorage.getItem("employmentStatus");
+        occupationInput.value = localStorage.getItem("occupation");
+        incomeInput.value = localStorage.getItem("income");
+        toggleFields();
+      }
+    };
+
+    // Clear button functionality
+    document.getElementById("clearBtn").addEventListener("click", () => {
+      input.value = "";
+      occupationInput.value = "";
+      incomeInput.value = "";
+      occupationWrapper.style.display = "none";
+      incomeWrapper.style.display = "none";
+      statusError.style.display = "none";
+      occupationError.style.display = "none";
+      incomeError.style.display = "none";
+      localStorage.clear();
+    });
+
+    // Previous button navigation
+    document.getElementById("prevBtn").addEventListener("click", (e) => {
+      e.preventDefault();
+      saveData();
+      window.location.href = "address.html";
+    });
+
+    // Next button validation + navigation
+    document.getElementById("nextBtn").addEventListener("click", (e) => {
+      e.preventDefault();
+      let valid = true;
+
+      if (input.value.trim() === "") {
+        statusError.style.display = "block";
+        valid = false;
+      } else {
+        statusError.style.display = "none";
+      }
+
+      if ((input.value === "Employed" || input.value === "Self-Employed") && occupationInput.value.trim() === "") {
+        occupationError.style.display = "block";
+        valid = false;
+      } else {
+        occupationError.style.display = "none";
+      }
+
+      if ((input.value === "Employed" || input.value === "Self-Employed") && incomeInput.value.trim() === "") {
+        incomeError.style.display = "block";
+        valid = false;
+      } else {
+        incomeError.style.display = "none";
+      }
+
+      if (valid) {
+        saveData();
+        window.location.href = "pharmacy.html";
+      }
+    });
+  </script>
+</body>
+</html>
