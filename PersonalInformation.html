@@ -89,7 +89,6 @@
 	const ssnInput = document.getElementById("ssn");
 	const dobInput = document.getElementById("dob");
 
-	// Keep your existing max; add min = 120 years ago
 	dobInput.max = new Date().toISOString().split("T")[0];
 	(function setDobMin() {
 	  const today = new Date();
@@ -326,7 +325,6 @@
         highlightField("lastName", false);
       }
 
-      // 🔹 Fix: Explicitly check empty DOB before invalid check
       if (!dobInput.value.trim()) {
         document.getElementById("dobError").textContent = "Date of Birth is required";
         document.getElementById("dobError").classList.remove("hidden");
