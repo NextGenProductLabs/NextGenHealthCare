@@ -89,7 +89,14 @@
 	const ssnInput = document.getElementById("ssn");
 	const dobInput = document.getElementById("dob");
 
+	// Keep your existing max; add min = 120 years ago
 	dobInput.max = new Date().toISOString().split("T")[0];
+	(function setDobMin() {
+	  const today = new Date();
+	  today.setHours(0,0,0,0);
+	  const minDate = new Date(today.getFullYear() - 120, today.getMonth(), today.getDate());
+	  dobInput.min = minDate.toISOString().split("T")[0];
+	})();
 
 	function highlightField(id, showError) {
 	  const el = document.getElementById(id);
@@ -163,27 +170,45 @@
 	}
 	ssnInput.addEventListener("change", syncAutofill);
 
-
     dobInput.addEventListener("input", () => {
-      const selectedDate = new Date(dobInput.value);
+      const err = document.getElementById("dobError");
+      const val = dobInput.value;
+
+      if (!val) {
+        err.textContent = "Date of Birth is required";
+        err.classList.remove("hidden");
+        highlightField("dob", true);
+        return;
+      }
+
+      const enteredDate = new Date(val);
       const today = new Date();
       today.setHours(0,0,0,0);
-      if (dobInput.value && selectedDate > today) {
-        document.getElementById("dobError").classList.remove("hidden");
+      const minDate = new Date(today.getFullYear() - 120, today.getMonth(), today.getDate());
+
+      if (enteredDate > today || enteredDate < minDate) {
+        err.textContent = "Date of Birth is invalid";
+        err.classList.remove("hidden");
         highlightField("dob", true);
       } else {
-        document.getElementById("dobError").classList.add("hidden");
+        err.classList.add("hidden");
         highlightField("dob", false);
       }
     });
+
+	
 	["firstName", "middleName", "lastName", "gender", "maritalStatus"].forEach(id => {
 	  const field = document.getElementById(id);
 	  if (field) {
 		field.addEventListener("input", (e) => {
 		  field.value = field.value.replace(/[^a-zA-Z\s]/g, ""); 
+		  if (field.value.length > 30) {
+		    field.value = field.value.slice(0, 30);
+		  }
 		});
 	  }
 	});
+
     ["firstName","lastName"].forEach(id => {
       const el = document.getElementById(id);
       el.addEventListener("input", () => {
@@ -301,24 +326,25 @@
         highlightField("lastName", false);
       }
 
-      // Validate DOB
-      if (!dobInput.value) {
-        dobError.textContent = "Date of birth is required";
-        dobError.classList.remove("hidden");
+      // 🔹 Fix: Explicitly check empty DOB before invalid check
+      if (!dobInput.value.trim()) {
+        document.getElementById("dobError").textContent = "Date of Birth is required";
+        document.getElementById("dobError").classList.remove("hidden");
         highlightField("dob", true);
         isValid = false;
       } else {
         const enteredDate = new Date(dobInput.value);
         const today = new Date();
-        const minDate = new Date(today.getFullYear() - 120, today.getMonth(), today.getDate()); // 120 years ago
+        today.setHours(0,0,0,0);
+        const minDate = new Date(today.getFullYear() - 120, today.getMonth(), today.getDate());
 
         if (enteredDate > today || enteredDate < minDate) {
-          dobError.textContent = "Date of birth is invalid";
-          dobError.classList.remove("hidden");
+          document.getElementById("dobError").textContent = "Date of Birth is invalid";
+          document.getElementById("dobError").classList.remove("hidden");
           highlightField("dob", true);
           isValid = false;
         } else {
-          dobError.classList.add("hidden");
+          document.getElementById("dobError").classList.add("hidden");
           highlightField("dob", false);
         }
       }
@@ -363,7 +389,7 @@
 		}
 
       if (isValid) {
-        window.location.href = "CI.html";
+        window.location.href = "ContactInformation.html";
       }
     }
   </script>
