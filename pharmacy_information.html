@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Pharmacy Information</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="flex items-center justify-center min-h-screen bg-gray-100">
+  <div class="bg-white p-6 rounded shadow-md w-full max-w-md space-y-4">
+    <h2 class="text-2xl font-bold text-center text-blue-600">Pharmacy Information</h2>
+
+    <!-- ZIP CODE FIELD -->
+    <label class="block font-medium">
+      <span class="text-red-500">*</span> ZIP Code
+    </label>
+    <input 
+      id="zipCode" 
+      type="text" 
+      maxlength="5" 
+      placeholder="example:00000"      class="border p-2 w-full rounded"
+      oninput="this.value = this.value.replace(/[^0-9]/g, ''); hideError('zipError'); hideError('noPharmacyError'); updatePharmacies(); sessionStorage.setItem('zipCode', this.value)"
+    />
+    <p id="zipError" class="text-red-500 text-sm hidden">
+      Please enter a valid 5-digit zip code
+    </p>
+    <p id="noPharmacyError" class="text-red-500 text-sm hidden">
+      No pharmacies found for the entered ZIP Code. Please try a different ZIP Code.
+    </p>
+
+    <!-- PHARMACY LOCATION FIELD --> 
+    <label class="block font-medium mt-4">
+      <span class="text-red-500">*</span> Preferred Pharmacy Location
+    </label>
+    <div class="relative">
+      <input 
+        type="text" 
+        id="pharmacyInput" 
+        placeholder="Type or select pharmacy"
+        class="border p-2 w-full rounded"
+        oninput="filterPharmacies(); hideError('locationError'); sessionStorage.setItem('pharmacyInput', this.value)" 
+        onclick="showDropdown()"
+      />
+      <ul id="pharmacyDropdown" class="absolute z-10 bg-white border mt-1 rounded w-full max-h-32 overflow-y-auto hidden"></ul>
+    </div>
+    <p id="locationError" class="text-red-500 text-sm hidden">Please select a pharmacy location</p>
+
+    <!-- BUTTONS -->
+    <div class="flex justify-between mt-6 gap-2 flex-wrap">
+      <button onclick="goBack()" class="bg-blue-600 text-white px-4 py-2 rounded">Previous</button>
+      <button onclick="clearForm()" class="bg-blue-600 text-white px-4 py-2 rounded">Clear</button>
+      <button onclick="validateAndContinue()" class="bg-blue-600 text-white px-4 py-2 rounded">Next</button>
+    </div>
+  </div>
+
+  <script>
+    const pharmacyData = {
+      "75061": [
+        "2021 North MacArthur Boulevard, 120, Irving, TX",
+        "2000 Esters Rd Ste 202, Irving, TX ",
+        "1625 N Story Rd Ste 148, Irving, TX ",
+        "Generx Discount Pharmacy, 1202 W Pioneer Dr Ste 140, Irving, TX",
+        "815 N O Connor Rd, Irving, TX",
+        "504 N O Connor Rd, Irving, TX"
+      ],
+      "75006": ["1235 South Josey Lane, Carrollton, TX "],
+      "75235": [
+        "6201 Harry Hines Boulevard, Dallas, TX ",
+        "6333 Forest Park Road, BLA 126, Dallas, TX ",
+        "2515 Inwood Road, Dallas, TX "
+      ],
+      "76021": [
+        "2901 Brown Trl, Bedford, TX ",
+        "3901 Airport Fwy Ste 116, Bedford, TX "
+      ],
+      "75038": [
+        "5477 N Macarthur Blvd, Irving, TX ",
+        "1110 Cottonwood Ln Ste 115, Irving, TX "
+      ],
+      "75062": [
+        "2616 Texas Dr, Irving, TX ",
+        "3636 N Macarthur Blvd Ste 100, Irving, TX ",
+        "2625 Texas Dr, Irving, TX ",
+        "3501 N Macarthur Blvd Ste 340, Irving, TX ",
+        "1111 W Airport Fwy Ste 151, Irving, TX ",
+        "421 E Airport Fwy, Irving, TX "
+      ],
+      "75039": ["6420 N Macarthur Blvd Ste 100, Irving, TX "],
+      "75063": [
+        "America First Pharmacy, 7801 Mesquite Bend Dr Ste 108, Irving, TX ",
+        "Doctors Specialty Pharmacy, 8600 Freeport Pkwy Ste 110, Irving, TX ",
+        "8300 Macarthur Blvd Ste 130, Irving, TX ",
+        "8787 N Macarthur Blvd Ste 120, Irving, TX "
+      ],
+      "75229": ["2552 Royal Ln, Dallas, TX "],
+      "76039": ["720 N Industrial Blvd, Euless, TX "],
+      "76034": ["5017 Heritage Ave Ste 113, Colleyville, TX "],
+      "75060": ["Meridian Pharmacy Group Irving, 1111 S Irving Heights Dr, Irving, TX "],
+      "76051": ["1115 W Northwest Hwy Ste H, Grapevine, TX "]
+    };
+
+    // Clear storage if page reloaded
+    if (performance.navigation.type === 1) {
+      sessionStorage.clear();
+    }
+
+    // Restore from session storage
+    window.onload = function () {
+      const savedZip = sessionStorage.getItem("zipCode");
+      const savedPharmacy = sessionStorage.getItem("pharmacyInput");
+
+      hideDropdown(); // always hide dropdown on load
+      document.getElementById("pharmacyDropdown").innerHTML = ""; // clear any list
+
+      if (savedZip) document.getElementById("zipCode").value = savedZip;
+      if (savedPharmacy) document.getElementById("pharmacyInput").value = savedPharmacy;
+    };
+
+    function hideError(id) {
+      document.getElementById(id).classList.add("hidden");
+    }
+
+    function updatePharmacies() {
+      const zip = document.getElementById("zipCode").value;
+      const dropdown = document.getElementById("pharmacyDropdown");
+      dropdown.innerHTML = "";
+
+      hideError("zipError");
+      hideError("noPharmacyError");
+
+      if (/^\d{5}$/.test(zip)) {
+        if (pharmacyData[zip]) {
+          pharmacyData[zip].forEach(pharmacy => {
+            const li = document.createElement("li");
+            li.textContent = pharmacy;
+            li.className = "p-2 hover:bg-blue-100 cursor-pointer";
+            li.onclick = () => selectPharmacy(pharmacy);
+            dropdown.appendChild(li);
+          });
+          showDropdown();
+        } else {
+          document.getElementById("noPharmacyError").classList.remove("hidden");
+          hideDropdown();
+        }
+      } else if (zip.length === 5) {
+        document.getElementById("zipError").classList.remove("hidden");
+        hideDropdown();
+      } else {
+        hideDropdown();
+      }
+    }
+
+    function filterPharmacies() {
+      const input = document.getElementById("pharmacyInput").value.toLowerCase();
+      const items = document.getElementById("pharmacyDropdown").querySelectorAll("li");
+      items.forEach(item => {
+        item.style.display = item.textContent.toLowerCase().includes(input) ? "block" : "none";
+      });
+    }
+
+    function selectPharmacy(name) {
+      document.getElementById("pharmacyInput").value = name;
+      sessionStorage.setItem("pharmacyInput", name);
+      hideDropdown();
+    }
+
+    function showDropdown() {
+      document.getElementById("pharmacyDropdown").classList.remove("hidden");
+    }
+
+    function hideDropdown() {
+      document.getElementById("pharmacyDropdown").classList.add("hidden");
+    }
+
+    document.addEventListener("click", function (event) {
+      const dropdown = document.getElementById("pharmacyDropdown");
+      const input = document.getElementById("pharmacyInput");
+      if (!dropdown.contains(event.target) && event.target !== input) {
+        hideDropdown();
+      }
+    });
+
+    function clearForm() {
+      document.getElementById("zipCode").value = "";
+      document.getElementById("pharmacyInput").value = "";
+      sessionStorage.removeItem("zipCode");
+      sessionStorage.removeItem("pharmacyInput");
+      hideError("zipError");
+      hideError("locationError");
+      hideError("noPharmacyError");
+      hideDropdown();
+      document.getElementById("pharmacyDropdown").innerHTML = "";
+      document.getElementById("zipCode").focus();
+    }
+
+    function validateAndContinue() {
+      const zip = document.getElementById("zipCode").value.trim();
+      const pharmacy = document.getElementById("pharmacyInput").value.trim();
+      let valid = true;
+
+      hideError("zipError");
+      hideError("noPharmacyError");
+      hideError("locationError");
+
+      if (!/^\d{5}$/.test(zip)) {
+        document.getElementById("zipError").classList.remove("hidden");
+        valid = false;
+      } else if (!pharmacyData[zip]) {
+        document.getElementById("noPharmacyError").classList.remove("hidden");
+        valid = false;
+      }
+
+      if (!pharmacy) {
+        document.getElementById("locationError").classList.remove("hidden");
+        valid = false;
+      }
+
+      if (valid) {
+        window.location.href = "insurance.html";
+      }
+    }
+
+    function goBack() {
+      // Clear dropdown state before going back
+      hideDropdown();
+      document.getElementById("pharmacyDropdown").innerHTML = "";
+      window.location.href = "employe.html";
+    }
+  </script>
+</body>
+</html>
