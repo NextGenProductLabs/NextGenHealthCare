@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Consent Forms — Digital Signature</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <style>
+        .sig-canvas { border: 1px solid #cbd5e1; border-radius: 6px; touch-action: none; background: #fff; }
+        .not-signed { color: #6b7280; }
+        .sig-preview { max-width: 100px; max-height: 50px; border: 1px solid #e5e7eb; border-radius: 4px; }
+        .signature-placeholder { border-bottom: 1px solid #000; display: inline-block; width: 150px; height: 30px; vertical-align: bottom; }
+        .form-summary-item { display: flex; align-items: center; border: 1px solid #e5e7eb; border-radius: 0.375rem; padding: 1rem; margin-bottom: 1rem; background-color: #f9fafb; }
+        .form-summary-item .content { flex-grow: 1; }
+        .form-summary-item h3 { font-size: 1.125rem; font-weight: 600; color: #1e40af; }
+        .form-summary-item .details { font-size: 0.875rem; color: #4b5563; margin-top: 0.25rem; }
+        .form-summary-item .edit-button { background-color: #f59e0b; color: white; padding: 0.5rem 1rem; border-radius: 0.375rem; font-weight: 600; cursor: pointer; border: none; }
+        .border-red-500 { border-color: #ef4444; }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen bg-gray-100 p-6 text-gray-900">
+
+<div id="personalInfoForm" class="bg-white p-6 rounded shadow-md w-full max-w-md">
+    <h2 class="text-2xl font-semibold text-center text-blue-800 mb-6">Personal Information</h2>
+
+    <label class="block font-medium mb-1"><span class="text-red-500">*</span>First Name:</label>
+    <input id="firstName" type="text" placeholder="Enter your first name" class="border p-2 w-full rounded mb-1">
+    <p id="firstNameError" class="text-red-500 text-sm hidden">First name is required</p>
+
+    <label class="block font-medium mt-4 mb-1">Middle Name:</label>
+    <input id="middleName" type="text" placeholder="Enter your middle name" class="border p-2 w-full rounded mb-1">
+
+    <label class="block font-medium mt-4 mb-1"><span class="text-red-500">*</span>Last Name:</label>
+    <input id="lastName" type="text" placeholder="Enter your last name" class="border p-2 w-full rounded mb-1">
+    <p id="lastNameError" class="text-red-500 text-sm hidden">Last name is required</p>
+
+    <label class="block font-medium mt-4 mb-1"><span class="text-red-500">*</span>Date of Birth:</label>
+    <input id="dob" type="date" placeholder="dd-mm-yyyy" class="border p-2 w-full rounded mb-1">
+    <p id="dobError" class="text-red-500 text-sm hidden">Date of Birth is required</p>
+
+    <label class="block font-medium mb-1 mt-4"><span class="text-red-500">*</span>Gender:</label>
+    <select id="gender" class="border rounded w-full px-3 py-1 mb-1">
+        <option value="">Select...</option>
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+        <option value="Other">Other</option>
+        <option value="Prefer not to say">Prefer not to say</option>
+    </select>
+    <p id="genderError" class="text-red-500 text-sm hidden">Gender is required</p>
+
+    <div class="flex justify-between mt-6">
+        <button onclick="clearForm()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-gray-600">Clear</button>
+        <button onclick="validateFormAndProceed()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Next</button>
+    </div>
+</div>
+
+<div id="mainForms" class="max-w-6xl mx-auto bg-white p-6 rounded shadow hidden">
+    <h1 class="text-2xl font-bold text-center text-blue-900 mb-6">Consent Forms</h1>
+    <table class="w-full border border-gray-300">
+        <thead>
+            <tr class="bg-blue-600 text-white">
+                <th class="p-3 border border-gray-300 text-left">Title</th>
+                <th class="p-3 border border-gray-300 text-left">Current Date</th>
+                <th class="p-3 border border-gray-300 text-left">Signature & Consent</th>
+                <th class="p-3 border border-gray-300 text-left">Last Reviewed Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="border-t border-gray-300">
+                <td class="p-3 border border-gray-300">
+                    <a href="javascript:void(0)" id="title-form1" class="text-blue-700 underline" onclick="openModal('form1')">General Treatment Consent</a>
+                </td>
+                <td class="p-3 border border-gray-300 text-sm" id="current-form1"></td>
+                <td class="p-3 border border-gray-300" id="cell-form1">
+                    <div class="not-signed">Not Signed</div>
+                </td>
+                <td class="p-3 border border-gray-300 text-sm" id="last-form1"></td>
+            </tr>
+            <tr class="border-t border-gray-300">
+                <td class="p-3 border border-gray-300">
+                    <a href="javascript:void(0)" id="title-form2" class="text-blue-700 underline" onclick="openModal('form2')">HIPAA Authorization</a>
+                </td>
+                <td class="p-3 border border-gray-300 text-sm" id="current-form2"></td>
+                <td class="p-3 border border-gray-300" id="cell-form2">
+                    <div class="not-signed">Not Signed</div>
+                </td>
+                <td class="p-3 border border-gray-300 text-sm" id="last-form2"></td>
+            </tr>
+            <tr class="border-t border-gray-300">
+                <td class="p-3 border border-gray-300">
+                    <a href="javascript:void(0)" id="title-form3" class="text-blue-700 underline" onclick="openModal('form3')">Financial Responsibility Agreement</a>
+                </td>
+                <td class="p-3 border border-gray-300 text-sm" id="current-form3"></td>
+                <td class="p-3 border border-gray-300" id="cell-form3">
+                    <div class="not-signed">Not Signed</div>
+                </td>
+                <td class="p-3 border border-gray-300 text-sm" id="last-form3"></td>
+            </tr>
+            <tr class="border-t border-gray-300">
+                <td class="p-3 border border-gray-300">
+                    <a href="javascript:void(0)" id="title-form4" class="text-blue-700 underline" onclick="openModal('form4')">Release of Information (ROI)</a>
+                </td>
+                <td class="p-3 border border-gray-300 text-sm" id="current-form4"></td>
+                <td class="p-3 border border-gray-300" id="cell-form4">
+                    <div class="not-signed">Not Signed</div>
+                </td>
+                <td class="p-3 border border-gray-300 text-sm" id="last-form4"></td>
+            </tr>
+        </tbody>
+    </table>
+    <p id="globalWarning" class="text-center text-red-600 mt-6 mb-4 hidden">
+        Please complete all required consent forms before submitting.
+    </p>
+    <div class="flex justify-center gap-4 mt-6">
+        <button class="bg-blue-600 text-white px-4 py-2 rounded" onclick="handlePrevious()">Previous</button>
+        <button class="bg-blue-600 text-white px-4 py-2 rounded" onclick="clearAll()">Clear All</button>
+        <button class="bg-blue-600 text-white px-4 py-2 rounded" onclick="showReviewPage()">Review and Submit</button>
+    </div>
+</div>
+<div id="reviewPage" class="max-w-6xl mx-auto bg-white p-6 rounded shadow hidden">
+    <h1 class="text-2xl font-bold text-center text-blue-900 mb-6">Review and Submit</h1>
+    <p class="text-center text-gray-700 mb-6">
+        Please review the completed consent forms before final submission.
+    </p>
+    <div id="formsSummary" class="border-t border-gray-300 pt-4">
+    </div>
+    <div class="mt-8 flex flex-col items-center">
+        <span id="downloadError" class="text-red-500 mb-4 hidden">Signature is required to download the PDF. Please sign first.</span>
+        <button id="downloadAllBtn" class="bg-green-600 text-white font-bold px-6 py-3 rounded-md shadow-md hover:bg-green-700 transition-colors duration-200" onclick="downloadAllForms()">
+            Download All Signed Documents as PDF
+        </button>
+        <div class="flex gap-4 mt-4">
+            <button class="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600" onclick="goBack()">
+                Go Back
+            </button>
+            <button class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700" onclick="submitFinal()">
+                Final Submission
+            </button>
+        </div>
+    </div>
+</div>
+<div id="modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
+    <div class="bg-white rounded-lg w-[92%] max-w-3xl p-6 max-h-[90vh] overflow-y-auto">
+        <div class="flex justify-between items-start">
+            <h2 id="modalTitle" class="text-xl font-semibold text-blue-800">Form Title</h2>
+            <button class="text-gray-600" onclick="closeModal()">✕</button>
+        </div>
+        <div id="modalText" class="mt-4 text-sm text-gray-800 whitespace-pre-wrap"></div>
+        <div id="editable-fields" class="mt-4 p-4 border border-gray-300 rounded-md bg-gray-50 hidden">
+            <p class="text-sm font-medium text-gray-700 mb-2">Please fill in the details below:</p>
+            <div id="form-fields"></div>
+        </div>
+        
+        <div class="mt-4 p-4 border border-gray-300 rounded-md bg-gray-50">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Sign below:</label>
+            <canvas id="signatureCanvas" class="sig-canvas w-full h-40"></canvas>
+            <div class="flex gap-2 mt-2">
+                <button class="bg-gray-200 px-3 py-1 rounded" onclick="clearSignature()">Clear Signature</button>
+            </div>
+            <p id="modalSignatureError" class="text-red-500 text-sm mt-2 hidden">Please sign first, then check the box.</p>
+            <div id="signatureSuccessMessage" class="mt-2 text-center text-green-500 font-bold hidden">Signature saved successfully!</div>
+        </div>
+        
+        <div id="agree-box" class="mt-4 p-3 hidden">
+        </div>
+
+        <div class="mt-4 flex items-center justify-between">
+            <span id="modalDownloadError" class="text-red-500 hidden">Signature is required to download.</span>
+            <button id="modalDownload" class="bg-green-600 text-white px-3 py-1 rounded" onclick="downloadingFormPDF(activeForm)">Download as PDF (with Signature)</button>
+        </div>
+        <div class="mt-4 text-right">
+            <button class="bg-gray-500 text-white px-4 py-2 rounded" onclick="closeModal()">Close</button>
+        </div>
+    </div>
+</div>
+<script>
+    /* -----------------------------
+        Personal Info Form Logic
+    ----------------------------- */
+
+    function highlightField(id, showError) {
+        const el = document.getElementById(id);
+        if (el) {
+            if (showError) el.classList.add("border-red-500");
+            else el.classList.remove("border-red-500");
+        }
+    }
+
+    ["firstName", "middleName", "lastName"].forEach(id => {
+        const field = document.getElementById(id);
+        if (field) {
+            field.addEventListener("input", (e) => {
+                field.value = field.value.replace(/[^a-zA-Z\s]/g, "");
+            });
+        }
+    });
+
+    ["firstName", "lastName"].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.addEventListener("input", () => {
+                const err = document.getElementById(id + "Error");
+                if (err) err.classList.add("hidden");
+                highlightField(id, false);
+            });
+        }
+    });
+
+    if (document.getElementById("gender")) {
+        document.getElementById("gender").addEventListener("change", () => {
+            const err = document.getElementById("genderError");
+            if (err) err.classList.add("hidden");
+            highlightField("gender", false);
+        });
+    }
+
+    if (document.getElementById("dob")) {
+        document.getElementById("dob").addEventListener("change", () => {
+            const err = document.getElementById("dobError");
+            if (err) err.classList.add("hidden");
+            highlightField("dob", false);
+        });
+    }
+
+    function validateFormAndProceed() {
+        let isValid = true;
+
+        const firstName = document.getElementById("firstName").value.trim();
+        const middleName = document.getElementById("middleName").value.trim();
+        const lastName = document.getElementById("lastName").value.trim();
+        const dob = document.getElementById("dob").value.trim();
+        const gender = document.getElementById("gender").value.trim();
+
+        if (!firstName) {
+            document.getElementById("firstNameError").classList.remove("hidden");
+            highlightField("firstName", true);
+            isValid = false;
+        } else {
+            document.getElementById("firstNameError").classList.add("hidden");
+            highlightField("firstName", false);
+        }
+
+        if (!lastName) {
+            document.getElementById("lastNameError").classList.remove("hidden");
+            highlightField("lastName", true);
+            isValid = false;
+        } else {
+            document.getElementById("lastNameError").classList.add("hidden");
+            highlightField("lastName", false);
+        }
+
+        if (!dob) {
+            document.getElementById("dobError").classList.remove("hidden");
+            highlightField("dob", true);
+            isValid = false;
+        } else {
+            document.getElementById("dobError").classList.add("hidden");
+            highlightField("dob", false);
+        }
+
+        if (!gender) {
+            document.getElementById("genderError").classList.remove("hidden");
+            highlightField("gender", true);
+            isValid = false;
+        } else {
+            document.getElementById("genderError").classList.add("hidden");
+            highlightField("gender", false);
+        }
+
+        if (isValid) {
+            // Save data to localStorage
+            const patientData = {
+                'first-name': firstName,
+                'middle-name': middleName,
+                'last-name': lastName,
+                'dob': dob,
+                'gender': gender,
+                // Combine first and last name for the consent form
+                'patient-name': firstName + ' ' + lastName
+            };
+            localStorage.setItem('global_patient_info', JSON.stringify(patientData));
+
+            document.getElementById("personalInfoForm").classList.add("hidden");
+            document.getElementById("mainForms").classList.remove("hidden");
+            renderAll();
+        }
+    }
+
+    function clearForm() {
+        ["firstName", "middleName", "lastName", "dob", "gender"].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                if (el.tagName === 'SELECT') {
+                    el.selectedIndex = 0; // Reset dropdown to the first option
+                } else {
+                    el.value = "";
+                }
+                highlightField(id, false);
+            }
+        });
+        document.querySelectorAll("[id$='Error']").forEach(el => el.classList.add("hidden"));
+        document.getElementById("firstName").focus();
+    }
+
+    /* -----------------------------
+        Consent Form Logic
+    ----------------------------- */
+    const formTexts = {
+        form1: `General Treatment Consent
+
+Patient Name: ___________________________
+Date of Birth: ___________________________
+
+ I hereby authorize the physicians, healthcare providers, nurses, medical staff, and other personnel
+ affiliated with NextGen Healthcare System to provide medical evaluation, diagnostic procedures, and
+ general treatment necessary for my care.
+
+ I understand and agree to the following:
+
+ Scope of Consent:
+ This consent covers routine medical and nursing care, including but not limited to physical
+ examinations, diagnostic testing (e.g., blood draws, imaging), administration of medications, and other
+ treatments deemed necessary by my healthcare providers.
+
+ Voluntary Participation:
+ I understand that my consent is voluntary and that I may withdraw it at any time. I also understand that
+ refusal or withdrawal of consent may impact the ability of the provider to deliver necessary medical
+ care.
+
+ Communication and Coordination:
+ I authorize the exchange of my medical information among authorized staff within the facility and
+ affiliated entities for the purpose of treatment, payment, and healthcare operations.
+ Privacy and Confidentiality
+
+ I acknowledge that my health information will be handled in accordance with HIPAA and applicable
+ privacy laws. I understand that a separate Notice of Privacy Practices is available for review.
+ Electronic Records and Signatures
+
+ I consent to the use of electronic systems for the storage, management, and transmission of my health
+ records, and I authorize my electronic signature to be valid as if signed in ink.
+ Emergency Care
+
+ In the event of an emergency, I consent to necessary medical treatment as determined by the
+ healthcare provider, even if I am unable to provide verbal or written consent at that time.
+
+ Patient/Legal Guardian Name (Print): ___________________________
+ Relationship to Patient (if applicable): __________________________
+ I agree with the terms and conditions.
+ Signature: ___________________________
+ Date Signed: ___________________________`,
+        form2: `HIPAA Authorization Consent Form
+
+Patient Name: ___________________________
+Date of Birth: ___________________________
+
+ Authorization to Use and Disclose Protected Health Information
+
+By signing this form, I authorize NextGen Healthcare System, its providers, staff, and business associates to
+ use and disclose my Protected Health Information (PHI) for the purposes of:
+
+ Treatment, including coordination of care with other healthcare providers
+
+ Payment, including billing and claims processing
+
+ Healthcare operations, including quality assessment, training, and auditing
+
+ Communication with insurance providers, pharmacy, labs, and other relevant entities
+
+ Information Authorized for Use or Disclosure:
+
+ This includes, but is not limited to:
+
+ Demographic and contact details
+
+ Medical history and treatment information
+
+ Prescription and pharmacy data
+
+ Insurance and billing details
+
+ Communication preferences
+
+ Persons/Entities Authorized to Receive My Information:
+
+ Health insurance providers
+
+ Pharmacy benefit managers
+
+ Authorized third-party service providers (e.g., EHR systems, communication platforms)
+
+ Government or regulatory bodies as required by law
+
+ Patient Rights and Acknowledgements:
+ I understand that I may revoke this authorization at any time by submitting a written request to
+ [Hospital/Clinic Name]'s Privacy Office, except to the extent actions have already been taken based on
+ this consent.
+
+ I understand that refusal to sign this authorization may affect my ability to receive certain healthcare
+ services.
+
+ I understand that my health information may be redisclosed by the recipient and may no longer be
+ protected under HIPAA.
+
+ I understand that I have the right to access and inspect a copy of my health information.
+
+ Patient/Legal Guardian Name (Print): ___________________________
+ Relationship to Patient (if not self): ____________________
+ I agree with the terms and conditions.
+ Signature: ___________________________
+ Date Signed: ___________________________`,
+        form3: `Financial Responsibility Agreement
+
+Patient Name: ___________________________
+Date of Birth: ___________________________
+
+ Patient Financial Responsibility Acknowledgment
+
+By signing this agreement, I acknowledge and agree to the following terms regarding my financial
+ responsibility for medical care and services provided by Next Gen Healthcare System:
+
+ 1. Assignment of Benefits
+ I authorize payment of medical benefits directly to Next Gen Healthcare System for services rendered
+ by its providers. I understand that I am financially responsible for any charges not covered by my
+ insurance, including but not limited to co-payments, co-insurance, deductibles, or services deemed
+ non-covered or out-of-network.
+
+ 2. Insurance Coverage
+ I understand that it is my responsibility to:
+ Provide accurate and up-to-date insurance information at the time of registration.
+ Notify Next Gen Healthcare System of any changes to my insurance.
+ Understand the terms of my insurance plan, including required referrals or pre-authorizations.
+
+ 3. Non-Covered Services
+ I acknowledge that some services provided may not be covered by my insurance plan. I agree to be
+ financially responsible for these services if my insurer denies coverage.
+
+ 4. Patient Statements & Payment
+ I agree to promptly pay any balances after insurance has processed the claim.
+ If my account becomes delinquent, I understand that collection efforts may be initiated, and I may be
+ responsible for additional collection or legal fees.
+ 5. Refunds
+ If I overpay for services due to insurance payments or other adjustments, I understand that Next Gen
+ Healthcare System will issue a refund for the overpaid amount.
+ Acknowledgment and Agreement
+ I have read, understand, and agree to the terms of this Financial Responsibility Agreement. I
+ understand that I may request a copy of this agreement for my records.
+ Patient/Legal Guardian Name (Print): ___________________________
+ Relationship to Patient (if not self): ____________________
+ I agree with the terms and conditions.
+ Signature: ___________________________
+ Date Signed: ___________________________`,
+        form4: `Release of Information Consent
+
+Patient Name: ___________________________
+Date of Birth: ___________________________
+ I hereby authorize NextGenHealthCare to release my medical information to: 
+
+Name/Organization: ___________________________________ 
+
+Address: ___________________________________ 
+
+Phone: ___________________________________ 
+
+Fax/Email: ___________________________________ 
+
+Information to be Released (check all that apply): 
+
+ ☐ Entire Medical Record 
+
+ ☐ Lab Results 
+
+ ☐ Imaging / Radiology Reports 
+
+ ☐ Billing Information 
+
+ ☐ Visit / Discharge Summaries 
+
+ ☐ Other (please specify): ______________________________ 
+
+Purpose of Release (check one): 
+
+ ☐ Continuity of Care 
+
+ ☐ Insurance / Billing 
+
+ ☐ Personal Use 
+
+ ☐ Legal Purposes 
+
+ ☐ Other: ____________________________ 
+
+Patient Rights 
+
+I understand that I may revoke this authorization at any time in writing. 
+
+I understand that treatment, payment, enrollment, or eligibility for benefits will not be conditioned on signing this form. 
+
+Information disclosed may be subject to re-disclosure by the recipient and may no longer be protected by HIPAA. 
+
+ 
+Patient/Legal Guardian Name (Print): ___________________________
+Relationship to Patient (if not self): ____________________
+I agree with the terms and conditions.
+Signature: ___________________________
+Date Signed: ___________________________`
+    };
+    const formTitles = {
+        form1: 'General Treatment Consent',
+        form2: 'HIPAA Authorization',
+        form3: 'Financial Responsibility Agreement',
+        form4: 'Release of Information (ROI)'
+    };
+    const relationshipOptions = [
+        'Patient', 'Parent', 'Sibling', 'Spouse', 'Legal Guardian', 'Authorized Representative'
+    ];
+    const formFields = {
+        form1: [
+            { id: 'patient-name', label: 'Patient Name (Print)', type: 'text' },
+            { id: 'dob', label: 'Date of Birth', type: 'date' },
+            { id: 'relationship-1', label: 'Relationship to Patient (if applicable)', type: 'dropdown', options: relationshipOptions }
+        ],
+        form2: [
+            { id: 'patient-name', label: 'Patient Name (Print)', type: 'text' },
+            { id: 'dob', label: 'Date of Birth', type: 'date' },
+            { id: 'relationship-2', label: 'Relationship to Patient (if not self)', type: 'dropdown', options: relationshipOptions }
+        ],
+        form3: [
+            { id: 'patient-name', label: 'Patient Name (Print)', type: 'text' },
+            { id: 'dob', label: 'Date of Birth', type: 'date' },
+            { id: 'relationship-3', label: 'Relationship to Patient (if not self)', type: 'dropdown', options: relationshipOptions }
+        ],
+        form4: [
+            { id: 'patient-name', label: 'Patient Name (Print)', type: 'text' },
+            { id: 'dob', label: 'Date of Birth', type: 'date' },
+            { id: 'relationship-4', label: 'Relationship to Patient (if not self)', type: 'dropdown', options: relationshipOptions },
+            { id: 'recipient-name', label: 'Recipient Name/Organization', type: 'text' },
+            { id: 'recipient-address', label: 'Recipient Address', type: 'text' },
+            { id: 'recipient-phone', label: 'Recipient Phone Number', type: 'tel' },
+            { id: 'recipient-fax', label: 'Recipient Fax/Email', type: 'text' },
+            { id: 'info-entire-medical-record', label: 'Entire Medical Record', type: 'checkbox', group: 'info' },
+            { id: 'info-lab-results', label: 'Lab Results', type: 'checkbox', group: 'info' },
+            { id: 'info-imaging-reports', label: 'Imaging / Radiology Reports', type: 'checkbox', group: 'info' },
+            { id: 'info-billing-info', label: 'Billing Information', type: 'checkbox', group: 'info' },
+            { id: 'info-visit-summaries', label: 'Visit / Discharge Summaries', type: 'checkbox', group: 'info' },
+            { id: 'info-other-checkbox', label: 'Other (please specify)', type: 'checkbox', group: 'info' },
+            { id: 'info-other-text', label: 'Other Information', type: 'text', group: 'info' },
+            { id: 'purpose-continuity-of-care', label: 'Continuity of Care', type: 'radio', group: 'purpose' },
+            { id: 'purpose-insurance-billing', label: 'Insurance / Billing', type: 'radio', group: 'purpose' },
+            { id: 'purpose-personal-use', label: 'Personal Use', type: 'radio', group: 'purpose' },
+            { id: 'purpose-legal-purposes', label: 'Legal Purposes', type: 'radio', group: 'purpose' },
+            { id: 'purpose-other-checkbox', label: 'Other', type: 'radio', group: 'purpose' },
+            { id: 'purpose-other-text', label: 'Other Purpose', type: 'text', group: 'purpose' },
+        ],
+    };
+    const agreeCheckboxes = {
+        form1: { id: 'agree-form1', label: 'I agree with the terms and conditions', type: 'checkbox' },
+        form2: { id: 'agree-form2', label: 'I agree with the terms and conditions', type: 'checkbox' },
+        form3: { id: 'agree-form3', label: 'I agree with the terms and conditions', type: 'checkbox' },
+        form4: { id: 'agree-form4', label: 'I agree with the terms and conditions', type: 'checkbox' }
+    };
+
+    const SHARED_SIGNATURE_KEY = 'global_signature';
+    const SHARED_SIGNATURE_DATE_KEY = 'global_signature_date';
+    const SHARED_PATIENT_INFO_KEY = 'global_patient_info';
+
+    function keyCurrent(fid){ return fid + '_current'; }
+    function keyLastReview(fid){ return fid + '_last'; }
+    function keyFields(fid){ return fid + '_fields'; }
+
+    function toDDMMYYYY(dateString) {
+        if (!dateString) return '';
+        const parts = dateString.split('-');
+        if (parts.length === 3) {
+            return `${parts[2]}/${parts[1]}/${parts[0]}`;
+        }
+        return dateString;
+    }
+
+    function clearAll(){
+        ['form1','form2','form3','form4'].forEach(fid => {
+            localStorage.removeItem(keyCurrent(fid));
+            localStorage.removeItem(keyLastReview(fid));
+            localStorage.removeItem(keyFields(fid));
+        });
+        localStorage.removeItem(SHARED_SIGNATURE_KEY);
+        localStorage.removeItem(SHARED_SIGNATURE_DATE_KEY);
+        localStorage.removeItem(SHARED_PATIENT_INFO_KEY);
+
+        // Hide the personal info form and review page and show the main forms page
+        document.getElementById("personalInfoForm").classList.add("hidden");
+        document.getElementById("reviewPage").classList.add("hidden");
+        document.getElementById("mainForms").classList.remove("hidden");
+        document.getElementById('globalWarning').classList.add('hidden');
+
+        // Re-render the main forms page to show 'Not Signed' for all forms
+        renderAll();
+    }
+
+    let activeForm = null, canvas, ctx, drawing = false, lastX=0, lastY=0;
+
+    function openModal(fid){
+        activeForm = fid;
+        document.getElementById('modalTitle').textContent = formTitles[fid];
+
+        let fieldData = JSON.parse(localStorage.getItem(keyFields(fid))) || {};
+        const globalPatientInfo = JSON.parse(localStorage.getItem(SHARED_PATIENT_INFO_KEY)) || {};
+
+        fieldData['patient-name'] = globalPatientInfo['patient-name'] || '';
+        fieldData['dob'] = globalPatientInfo['dob'] || '';
+        
+        const relationshipId = `relationship-${fid.charAt(fid.length - 1)}`;
+        fieldData[relationshipId] = globalPatientInfo['relationship-to-patient'] || fieldData[relationshipId];
+
+
+        const signatureData = localStorage.getItem(SHARED_SIGNATURE_KEY);
+        document.getElementById('modalText').innerHTML = formWithTextWithData(formTexts[fid], fid, fieldData, signatureData, true);
+
+        renderEditableFields(fid, fieldData);
+
+        document.getElementById('modal').classList.remove('hidden');
+        setUpCanvas();
+        if (signatureData){
+            const img = new Image();
+            img.onload = () => {
+                ctx.clearRect(0,0,canvas.width,canvas.height);
+                ctx.drawImage(img, 0, 0, canvas.width / (window.devicePixelRatio||1),
+                canvas.height / (window.devicePixelRatio||1));
+            };
+            img.src = signatureData;
+            document.getElementById('signatureCanvas').classList.remove('border-red-500');
+            document.getElementById('modalSignatureError').classList.add('hidden');
+        } else {
+            clearCanvas();
+        }
+    }
+
+    function closeModal(){
+        if (activeForm) {
+            const fieldData = getEditableFieldsData();
+            localStorage.setItem(keyFields(activeForm), JSON.stringify(fieldData));
+
+            const globalPatientInfo = JSON.parse(localStorage.getItem(SHARED_PATIENT_INFO_KEY)) || {};
+
+            if (fieldData['patient-name']) {
+                globalPatientInfo['patient-name'] = fieldData['patient-name'];
+            }
+            if (fieldData['dob']) {
+                globalPatientInfo['dob'] = fieldData['dob'];
+            }
+            const relationshipId = `relationship-${activeForm.charAt(activeForm.length - 1)}`;
+            if (fieldData[relationshipId]) {
+                globalPatientInfo['relationship-to-patient'] = fieldData[relationshipId];
+            }
+            
+            localStorage.setItem(SHARED_PATIENT_INFO_KEY, JSON.stringify(globalPatientInfo));
+
+            const allForms = ['form1', 'form2', 'form3', 'form4'];
+            allForms.forEach(fid => {
+                const existingData = JSON.parse(localStorage.getItem(keyFields(fid))) || {};
+
+                existingData['patient-name'] = globalPatientInfo['patient-name'];
+                existingData['dob'] = globalPatientInfo['dob'];
+                
+                const otherRelationshipId = `relationship-${fid.charAt(fid.length - 1)}`;
+                existingData[otherRelationshipId] = globalPatientInfo['relationship-to-patient'];
+
+                localStorage.setItem(keyFields(fid), JSON.stringify(existingData));
+            });
+        }
+        document.getElementById('modal').classList.add('hidden');
+        activeForm = null;
+        renderAll();
+    }
+
+    function isCanvasEmpty() {
+        if (!ctx || !canvas) return true;
+        const pixelBuffer = new Uint32Array(ctx.getImageData(0, 0, canvas.width, canvas.height).data.buffer);
+        return !pixelBuffer.some(color => color !== 0);
+    }
+
+    function setUpCanvas(){
+        canvas = document.getElementById('signatureCanvas');
+        if (!canvas) return;
+        const ratio = window.devicePixelRatio || 1;
+        canvas.width = canvas.clientWidth * ratio;
+        canvas.height = canvas.clientHeight * ratio;
+        ctx = canvas.getContext('2d');
+        ctx.scale(ratio, ratio);
+        ctx.lineWidth = 3;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.strokeStyle = '#111827';
+        canvas.onpointerdown = e => {
+            document.getElementById('signatureCanvas').classList.remove('border-red-500');
+            document.getElementById('modalSignatureError').classList.add('hidden');
+            drawing = true;
+            const rect = canvas.getBoundingClientRect();
+            lastX = e.clientX - rect.left;
+            lastY = e.clientY - rect.top;
+        };
+        canvas.onpointermove = e => {
+            if(!drawing) return;
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            ctx.beginPath();
+            ctx.moveTo(lastX,lastY);
+            ctx.lineTo(x,y);
+            ctx.stroke();
+            lastX = x; lastY = y;
+        };
+        canvas.onpointerup = canvas.onpointercancel = () => drawing = false;
+    }
+
+    function clearCanvas(){
+        if (ctx && canvas) {
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+        }
+    }
+
+    function clearSignature(){
+        localStorage.removeItem(SHARED_SIGNATURE_KEY);
+        localStorage.removeItem(SHARED_SIGNATURE_DATE_KEY);
+        clearCanvas();
+        renderAll();
+    }
+    
+    function formWithTextWithData(originalText, fid, data, signatureData = null, isModal = false) {
+        let newText = originalText;
+        const sigPlaceholder = 'Signature: ___________________________';
+        const signatureImageHTML = signatureData ? `<img src="${signatureData}" class="sig-preview inline-block align-middle ml-2">` : `<span class="signature-placeholder"></span>`;
+        const agreePlaceholder = 'I agree with the terms and conditions.';
+        const agreeChecked = data[`agree-${fid}`] ? '☑' : '☐';
+        const signedDate = localStorage.getItem(SHARED_SIGNATURE_DATE_KEY) || '___________________________';
+
+        const globalPatientInfo = JSON.parse(localStorage.getItem(SHARED_PATIENT_INFO_KEY)) || {};
+        const patientName = globalPatientInfo['patient-name'] || '___________________________';
+        const patientDob = toDDMMYYYY(globalPatientInfo['dob']) || '___________________________';
+        
+        let relationshipText = '____________________';
+        if (fid === 'form1') {
+            relationshipText = data['relationship-1'] || '__________________________';
+        } else if (fid === 'form2') {
+            relationshipText = data['relationship-2'] || '____________________';
+        } else if (fid === 'form3') {
+            relationshipText = data['relationship-3'] || '____________________';
+        } else if (fid === 'form4') {
+            relationshipText = data['relationship-4'] || '____________________';
+        }
+
+        newText = newText.replace('Patient Name: ___________________________', `Patient Name: ${patientName}`);
+        newText = newText.replace('Date of Birth: ___________________________', `Date of Birth: ${patientDob}`);
+        newText = newText.replace('Patient/Legal Guardian Name (Print): ___________________________', `Patient/Legal Guardian Name (Print): ${patientName}`);
+        newText = newText.replace(agreePlaceholder, `${agreeChecked} ${agreePlaceholder}`);
+        
+        if (isModal) {
+            newText = newText.replace(sigPlaceholder, `Signature: ${signatureImageHTML}`);
+        } else {
+            newText = newText.replace(sigPlaceholder, `Signature: SIG_PLACEHOLDER`);
+        }
+        
+        newText = newText.replace('Date Signed: ___________________________', `Date Signed: ${signedDate}`);
+
+        if (fid === 'form1') {
+             newText = newText.replace('Relationship to Patient (if applicable): __________________________', `Relationship to Patient (if applicable): ${relationshipText}`);
+        } else if (fid === 'form2') {
+             newText = newText.replace(`Relationship to Patient (if not self): ____________________`, `Relationship to Patient (if not self): ${relationshipText}`);
+        } else if (fid === 'form3') {
+             newText = newText.replace('Relationship to Patient (if not self): ____________________', `Relationship to Patient (if not self): ${relationshipText}`);
+        } else if (fid === 'form4') {
+             newText = newText.replace('Relationship to Patient (if not self): ____________________', `Relationship to Patient (if not self): ${relationshipText}`);
+             newText = newText.replace(/☐ Entire Medical Record/g, (data['info-entire-medical-record'] ? '☑' : '☐') + ' Entire Medical Record');
+             newText = newText.replace(/☐ Lab Results/g, (data['info-lab-results'] ? '☑' : '☐') + ' Lab Results');
+             newText = newText.replace(/☐ Imaging \/ Radiology Reports/g, (data['info-imaging-reports'] ? '☑' : '☐') + ' Imaging / Radiology Reports');
+             newText = newText.replace(/☐ Billing Information/g, (data['info-billing-info'] ? '☑' : '☐') + ' Billing Information');
+             newText = newText.replace(/☐ Visit \/ Discharge Summaries/g, (data['info-visit-summaries'] ? '☑' : '☐') + ' Visit / Discharge Summaries');
+             newText = newText.replace(/☐ Continuity of Care/g, (data['purpose-continuity-of-care'] ? '☑' : '☐') + ' Continuity of Care');
+             newText = newText.replace(/☐ Insurance \/ Billing/g, (data['purpose-insurance-billing'] ? '☑' : '☐') + ' Insurance / Billing');
+             newText = newText.replace(/☐ Personal Use/g, (data['purpose-personal-use'] ? '☑' : '☐') + ' Personal Use');
+             newText = newText.replace(/☐ Legal Purposes/g, (data['purpose-legal-purposes'] ? '☑' : '☐') + ' Legal Purposes');
+
+             newText = newText.replace('Other (please specify): ______________________________', `Other (please specify): ${data['info-other-text'] || '______________________________'}`);
+             newText = newText.replace('Other: ____________________________', `Other: ${data['purpose-other-text'] || '____________________________'}`);
+
+             newText = newText.replace('Name/Organization: ___________________________________', `Name/Organization: ${data['recipient-name'] || '___________________________________'}`);
+             newText = newText.replace('Address: ___________________________________', `Address: ${data['recipient-address'] || '___________________________________'}`);
+             newText = newText.replace('Phone: ___________________________________', `Phone: ${data['recipient-phone'] || '___________________________________'}`);
+             newText = newText.replace('Fax/Email: ___________________________________', `Fax/Email: ${data['recipient-fax'] || '___________________________________'}`);
+        }
+
+        return newText;
+    }
+
+    function renderEditableFields(fid, data) {
+        const fieldsContainer = document.getElementById('form-fields');
+        const agreeBox = document.getElementById('agree-box');
+        fieldsContainer.innerHTML = '';
+        agreeBox.innerHTML = '';
+        const fields = formFields[fid] || [];
+
+        const globalPatientInfo = JSON.parse(localStorage.getItem(SHARED_PATIENT_INFO_KEY)) || {};
+
+        fields.forEach(field => {
+            if (field.id === 'patient-name' || field.id === 'dob') {
+                return;
+            }
+
+            const fieldDiv = document.createElement('div');
+            fieldDiv.className = 'flex flex-col mb-2';
+
+            if (field.type === 'checkbox') {
+                 fieldDiv.innerHTML = `
+                    <label class="inline-flex items-center text-sm font-medium text-gray-700">
+                        <input type="checkbox" id="${field.id}" class="form-checkbox h-4 w-4 text-blue-600 transition duration-150 ease-in-out">
+                        <span class="ml-2">${field.label}</span>
+                    </label>
+                `;
+                fieldsContainer.appendChild(fieldDiv);
+            } else if (field.type === 'radio') {
+                 fieldDiv.innerHTML = `
+                    <label class="inline-flex items-center text-sm font-medium text-gray-700">
+                        <input type="radio" id="${field.id}" name="${field.group}" class="form-radio h-4 w-4 text-blue-600 transition duration-150 ease-in-out">
+                        <span class="ml-2">${field.label}</span>
+                    </label>
+                `;
+                fieldsContainer.appendChild(fieldDiv);
+            } else if (field.type === 'dropdown') {
+                const optionsHtml = field.options.map(option => `<option value="${option}">${option}</option>`).join('');
+                fieldDiv.innerHTML = `
+                    <label for="${field.id}" class="text-sm font-medium text-gray-700">${field.label}:</label>
+                    <select id="${field.id}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 px-2 py-1">
+                        <option value="">Select...</option>
+                        ${optionsHtml}
+                    </select>
+                `;
+                fieldsContainer.appendChild(fieldDiv);
+            } else if (field.type === 'text' || field.type === 'date' || field.type === 'tel') {
+                fieldDiv.innerHTML = `
+                    <label for="${field.id}" class="text-sm font-medium text-gray-700">${field.label}:</label>
+                    <input type="${field.type}" id="${field.id}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 px-2 py-1">
+                `;
+                fieldsContainer.appendChild(fieldDiv);
+            }
+
+            const inputElement = document.getElementById(field.id);
+            if (inputElement) {
+                if (field.type === 'checkbox' || field.type === 'radio') {
+                    inputElement.checked = data[field.id] || false;
+                } else {
+                    inputElement.value = data[field.id] || '';
+                }
+            }
+        });
+
+        const agreeField = agreeCheckboxes[fid];
+        if (agreeField) {
+            agreeBox.innerHTML = `
+                <div class="flex flex-col">
+                    <label class="inline-flex items-center text-sm font-bold text-gray-800">
+                        <input type="checkbox" id="${agreeField.id}" class="form-checkbox h-4 w-4 text-blue-600 transition duration-150 ease-in-out">
+                        <span class="ml-2"><span style="color: red;">*</span> ${agreeField.label}</span>
+                    </label>
+                    <div class="text-xs text-gray-500 mt-1">Date: ${new Date().toLocaleDateString('en-GB')}</div>
+                </div>
+            `;
+            const agreeInputElement = document.getElementById(agreeField.id);
+            if (agreeInputElement) {
+                agreeInputElement.checked = data[agreeField.id] || false;
+                 agreeInputElement.addEventListener('change', (e) => {
+                    const signatureDataURL = canvas.toDataURL();
+                    const successMessage = document.getElementById('signatureSuccessMessage');
+                    const modalSignatureError = document.getElementById('modalSignatureError');
+                    const signatureCanvas = document.getElementById('signatureCanvas');
+
+                    if (e.target.checked) {
+                        if (isCanvasEmpty()) {
+                            signatureCanvas.classList.add('border-red-500');
+                            modalSignatureError.classList.remove('hidden');
+                            e.target.checked = false; 
+                            return;
+                        }
+
+                        localStorage.setItem(SHARED_SIGNATURE_KEY, signatureDataURL);
+                        const currentDate = new Date().toLocaleDateString('en-GB');
+                        localStorage.setItem(SHARED_SIGNATURE_DATE_KEY, currentDate);
+
+                        const fieldsData = JSON.parse(localStorage.getItem(keyFields(activeForm))) || {};
+                        fieldsData[agreeField.id] = true;
+                        localStorage.setItem(keyFields(activeForm), JSON.stringify(fieldsData));
+
+                        signatureCanvas.classList.remove('border-red-500');
+                        modalSignatureError.classList.add('hidden');
+                        successMessage.classList.remove('hidden');
+                        setTimeout(() => {
+                            successMessage.classList.add('hidden');
+                        }, 3000);
+
+                    } else {
+                        const fieldsData = JSON.parse(localStorage.getItem(keyFields(activeForm))) || {};
+                        fieldsData[agreeField.id] = false;
+                        localStorage.setItem(keyFields(activeForm), JSON.stringify(fieldsData));
+                        
+                        localStorage.removeItem(SHARED_SIGNATURE_KEY);
+                        localStorage.removeItem(SHARED_SIGNATURE_DATE_KEY);
+                        clearCanvas();
+                    }
+                });
+            }
+            agreeBox.classList.remove('hidden');
+        } else {
+            agreeBox.classList.add('hidden');
+        }
+
+        document.getElementById('editable-fields').classList.remove('hidden');
+    }
+
+    function getEditableFieldsData() {
+        const data = {};
+        const fields = formFields[activeForm] || [];
+        const agreeField = agreeCheckboxes[activeForm];
+
+        fields.forEach(field => {
+            const inputElement = document.getElementById(field.id);
+            if (inputElement) {
+                if (field.type === 'checkbox' || field.type === 'radio') {
+                    data[field.id] = inputElement.checked;
+                } else {
+                    data[field.id] = inputElement.value;
+                }
+            }
+        });
+
+        if (agreeField) {
+            const agreeInputElement = document.getElementById(agreeField.id);
+            if (agreeInputElement) {
+                data[agreeField.id] = agreeInputElement.checked;
+            }
+        }
+
+        return data;
+    }
+
+    function renderAll(){
+        const fids = ['form1','form2','form3','form4'];
+        const signatureData = localStorage.getItem(SHARED_SIGNATURE_KEY);
+        const signedDate = localStorage.getItem(SHARED_SIGNATURE_DATE_KEY);
+
+        fids.forEach(fid => {
+            const currentCell = document.getElementById('current-' + fid);
+            const lastCell = document.getElementById('last-' + fid);
+            const signatureCell = document.getElementById('cell-' + fid);
+
+            const fieldData = JSON.parse(localStorage.getItem(keyFields(fid))) || {};
+            const isAgreed = fieldData[`agree-${fid}`];
+
+            if (signatureData && isAgreed) {
+                signatureCell.innerHTML = `
+                    <div class="flex items-center">
+                        <img src="${signatureData}" class="sig-preview inline-block">
+                    </div>
+                `;
+            } else {
+                signatureCell.innerHTML = '<div class="not-signed">Not Signed</div>';
+            }
+
+            if (signedDate && isAgreed) {
+                currentCell.textContent = signedDate;
+                lastCell.textContent = signedDate;
+            } else {
+                currentCell.textContent = '';
+                lastCell.textContent = '';
+            }
+        });
+    }
+
+    function showReviewPage() {
+        const fids = ['form1', 'form2', 'form3', 'form4'];
+        let allFormsAgreed = true;
+        let incompleteForms = [];
+        fids.forEach(fid => {
+            const fieldData = JSON.parse(localStorage.getItem(keyFields(fid))) || {};
+            if (!fieldData[`agree-${fid}`]) {
+                allFormsAgreed = false;
+                incompleteForms.push(formTitles[fid]);
+            }
+        });
+
+        const globalWarning = document.getElementById('globalWarning');
+        if (!allFormsAgreed) {
+            globalWarning.textContent = `Please agree to the terms and conditions in all forms before submitting. The following forms are incomplete: ${incompleteForms.join(', ')}`;
+            globalWarning.classList.remove('hidden');
+            return;
+        } else {
+            globalWarning.classList.add('hidden');
+        }
+
+        document.getElementById('mainForms').classList.add('hidden');
+        document.getElementById('reviewPage').classList.remove('hidden');
+        const summaryContainer = document.getElementById('formsSummary');
+        summaryContainer.innerHTML = '';
+        
+        const signedDate = localStorage.getItem(SHARED_SIGNATURE_DATE_KEY);
+
+        fids.forEach(fid => {
+            const formTitle = formTitles[fid];
+            const fieldData = JSON.parse(localStorage.getItem(keyFields(fid))) || {};
+            const isAgreed = fieldData[`agree-${fid}`];
+
+            const summaryItem = document.createElement('div');
+            summaryItem.className = 'form-summary-item';
+
+            const signaturePreview = localStorage.getItem(SHARED_SIGNATURE_KEY) && isAgreed ? `<img src="${localStorage.getItem(SHARED_SIGNATURE_KEY)}" class="sig-preview" />` : '';
+            const displayDate = isAgreed ? (signedDate || 'N/A') : 'N/A';
+
+            summaryItem.innerHTML = `
+                ${signaturePreview}
+                <div class="content ml-4">
+                    <h3>${formTitle}</h3>
+                    <div class="details">
+                        Date Signed: ${displayDate}
+                        <br>
+                        Last Reviewed: ${displayDate}
+                    </div>
+                </div>
+                <button class="edit-button" onclick="openModal('${fid}')">Edit</button>
+            `;
+            summaryContainer.appendChild(summaryItem);
+        });
+    }
+
+    function goBack() {
+        document.getElementById('reviewPage').classList.add('hidden');
+        document.getElementById('mainForms').classList.remove('hidden');
+    }
+    
+    function handlePrevious() {
+        const patientData = JSON.parse(localStorage.getItem(SHARED_PATIENT_INFO_KEY));
+        if (patientData) {
+            document.getElementById("firstName").value = patientData['first-name'] || '';
+            document.getElementById("middleName").value = patientData['middle-name'] || '';
+            document.getElementById("lastName").value = patientData['last-name'] || '';
+            document.getElementById("dob").value = patientData['dob'] || '';
+            document.getElementById("gender").value = patientData['gender'] || '';
+        }
+
+        document.getElementById("personalInfoForm").classList.remove("hidden");
+        document.getElementById("mainForms").classList.add("hidden");
+        document.getElementById("reviewPage").classList.add("hidden");
+    }
+
+    async function addFormToPdf(pdf, fid, isFirstForm) {
+        if (!isFirstForm) {
+            pdf.addPage();
+        }
+
+        const fieldData = JSON.parse(localStorage.getItem(keyFields(fid))) || {};
+        const signatureData = localStorage.getItem(SHARED_SIGNATURE_KEY);
+        const formTitle = formTitles[fid];
+        const yPos = 20;
+
+        const formContent = formWithTextWithData(formTexts[fid], fid, fieldData, null, false);
+        const lines = formContent.split('\n');
+
+        let currentY = yPos;
+        const LINE_HEIGHT = 5;
+        const IMAGE_WIDTH = 50;
+        const IMAGE_HEIGHT = 25;
+        const PAGE_MARGIN_BOTTOM = 20;
+
+        pdf.setFontSize(14);
+        pdf.text(formTitle, 10, currentY);
+        currentY += 10;
+        pdf.setFontSize(10);
+
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i];
+
+            if (line.includes('SIG_PLACEHOLDER')) {
+                continue;
+            }
+
+            const splitLines = pdf.splitTextToSize(line, 180);
+
+            if (currentY + splitLines.length * LINE_HEIGHT > pdf.internal.pageSize.height - PAGE_MARGIN_BOTTOM) {
+                pdf.addPage();
+                currentY = yPos;
+            }
+
+            pdf.text(splitLines, 10, currentY);
+            currentY += splitLines.length * LINE_HEIGHT;
+        }
+
+        if (signatureData) {
+            const signatureImage = new Image();
+            signatureImage.src = signatureData;
+            await new Promise(resolve => {
+                signatureImage.onload = () => {
+                    if (currentY + IMAGE_HEIGHT > pdf.internal.pageSize.height - PAGE_MARGIN_BOTTOM) {
+                         pdf.addPage();
+                         currentY = yPos;
+                    }
+                    pdf.addImage(signatureImage, 'PNG', 10, currentY, IMAGE_WIDTH, IMAGE_HEIGHT);
+                    resolve();
+                };
+            });
+        }
+    }
+
+    async function downloadingFormPDF(fid) {
+        if (!localStorage.getItem(SHARED_SIGNATURE_KEY)) {
+            document.getElementById('modalDownloadError').classList.remove('hidden');
+            return;
+        }
+        document.getElementById('modalDownloadError').classList.add('hidden');
+
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF();
+
+        await addFormToPdf(pdf, fid, true);
+
+        pdf.save(`${formTitles[fid].replace(/ /g, '-')}.pdf`);
+    }
+
+    async function downloadAllForms() {
+        if (!localStorage.getItem(SHARED_SIGNATURE_KEY)) {
+            document.getElementById('downloadError').classList.remove('hidden');
+            return;
+        }
+
+        document.getElementById('downloadError').classList.add('hidden');
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF();
+
+        const fids = ['form1', 'form2', 'form3', 'form4'];
+
+        for (let i = 0; i < fids.length; i++) {
+            const fid = fids[i];
+            await addFormToPdf(pdf, fid, i === 0);
+        }
+
+        pdf.save('all-signed-consent-forms.pdf');
+    }
+
+    function submitFinal() {
+        alert('All forms submitted successfully!');
+        clearAll();
+    }
+
+    window.onload = () => {
+        const globalPatientInfo = JSON.parse(localStorage.getItem(SHARED_PATIENT_INFO_KEY));
+        if (globalPatientInfo) {
+            document.getElementById("firstName").value = globalPatientInfo['first-name'] || '';
+            document.getElementById("middleName").value = globalPatientInfo['middle-name'] || '';
+            document.getElementById("lastName").value = globalPatientInfo['last-name'] || '';
+            document.getElementById("dob").value = globalPatientInfo['dob'] || '';
+            document.getElementById("gender").value = globalPatientInfo['gender'] || '';
+            document.getElementById("personalInfoForm").classList.add("hidden");
+            document.getElementById("mainForms").classList.remove("hidden");
+        }
+        renderAll();
+    };
+</script>
+</body>
+</html>
